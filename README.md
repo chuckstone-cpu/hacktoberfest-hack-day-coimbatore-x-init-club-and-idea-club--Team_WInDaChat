@@ -1,19 +1,19 @@
-# Connectore
+# newNectore
 
-> A local-first second brain. Gemma 4 connects your scattered notes across subjects, narrates them as a story, checks its own story against your notes for dropped facts, and includes a lab that measures how far Gemma's KV cache can be compressed before it starts forgetting things.
+> A local-first second brain. Gemma 4 connects your scattered notes across subjects, narrates them as a story, **checks its own story against your notes for dropped facts**, and includes a lab that measures **how far Gemma's KV cache can be compressed before it starts forgetting things**.
+
+Everything runs on a laptop through Ollama. No cloud API, and your notes never leave your machine.
 
 ## Team
 
 **Team Name:** WInDaChat
 
-
-| Member | Contribution   |
-| ------ | -------------- |
+| Member | Contribution |
+| ------ | ------------ |
 | V Aravindhan | [Contribution] |
 | Siva Krithick | [Contribution] |
 | Sahesh Karthikeyan | [Contribution] |
 | Sathyanarayanan | [Contribution] |
-
 
 ## Problem Statement
 
@@ -21,9 +21,9 @@
 
 Students and curious readers take notes in silos: Control Systems notes in one place, Computer Networks in another, news in a third. The most valuable insight is often the link between them. Negative feedback in a control loop, TCP congestion control and the RBI raising the repo rate to curb inflation are all the same idea: a feedback loop. Nobody sees that link, because the notes share almost no words.
 
-AI summaries have a trust problem of their own. Published studies report that LLM summaries tend to drop caveats and overgeneralise (Peters & Chin-Yee, Royal Society Open Science, 2025). An EBU/BBC study of AI assistants answering news questions found significant issues in 45% of answers (AIB summary, 2025). A fluent summary is not necessarily a faithful one.
+AI summaries have a trust problem of their own. Published studies report that LLM summaries tend to drop caveats and overgeneralise ([Peters & Chin-Yee, *Royal Society Open Science*, 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC12042776)). An EBU/BBC study of AI assistants answering news questions found significant issues in 45% of answers ([AIB summary, 2025](https://aib.org.uk/ai-assistants-misrepresent-news-content-says-major-study/)). A fluent summary is not necessarily a faithful one.
 
-Running models locally has a memory problem. Long prompts, such as "tell me the story of my last 30 notes", make the KV cache grow until it competes with the model weights for RAM and VRAM. KV-cache quantization (q8 / q4) saves memory, but community benchmarks report that Gemma 4 is unusually sensitive to it (LocalBench). "Just use q4" may quietly cost accuracy.
+Running models locally has a memory problem. Long prompts, such as "tell me the story of my last 30 notes", make the KV cache grow until it competes with the model weights for RAM and VRAM. KV-cache quantization (q8 / q4) saves memory, but community benchmarks report that Gemma 4 is unusually sensitive to it ([LocalBench](https://localbench.substack.com/p/kv-cache-quantization-benchmark)). "Just use q4" may quietly cost accuracy.
 
 ### Why We Chose This Problem
 
@@ -31,14 +31,14 @@ We are students. We wanted a tool we would use ourselves, one that turns a semes
 
 ## Solution
 
-connectore has three parts, all built on one local Gemma 4 model.
+newNectore has three parts, all built on one local Gemma 4 model.
 
-Connect. You write a note. Gemma 4 tags it with entities and abstract patterns (e.g. feedback loop, trade-off, bottleneck), shortlists related older notes, and judges each candidate. The result is a typed link (causes, consequence_of, continuation, contradicts, same_idea), a strength from 1 to 5, and a one-line reason citing a shared fact. Only strong links (≥ 4) are kept. Linked notes form threads, and Gemma can narrate any thread as a short story.
-Verify. Before you trust a story or a summary, a verification layer inspired by TrueSimple checks it against the source notes:
-Deterministic cue diff: numbers, units, dates, negations (not, never), conditions (unless, only if) and bounds (at least, up to) are compared between source and output.
-Fact quiz: Gemma extracts must-keep facts from the sources, then answers a question about each fact using only the generated text. A "not stated" answer means the fact may have been dropped.
-Each fact is marked Appears preserved, Needs review or Possible mismatch, with the source span shown next to it.
-Compress (KV Lab). The same story-plus-verify workload runs with Gemma's KV cache at f16, q8_0 and q4_0. The lab records memory, speed and how many facts survive. The question it answers is how much memory can be saved before the model starts forgetting facts.
+1. **Connect.** You write a note. Gemma 4 tags it with entities and abstract patterns (e.g. *feedback loop*, *trade-off*, *bottleneck*), shortlists related older notes, and judges each candidate. The result is a typed link (`causes`, `consequence_of`, `continuation`, `contradicts`, `same_idea`), a strength from 1 to 5, and a one-line reason citing a shared fact. Only strong links (>= 4) are kept. Linked notes form **threads**, and Gemma can narrate any thread as a short **story**.
+2. **Verify.** Before you trust a story or a summary, a verification layer inspired by TrueSimple checks it against the source notes:
+   - **Deterministic cue diff:** numbers, units, dates, negations (`not`, `never`), conditions (`unless`, `only if`) and bounds (`at least`, `up to`) are compared between source and output.
+   - **Fact quiz:** Gemma extracts must-keep facts from the sources, then answers a question about each fact using *only* the generated text. A "not stated" answer means the fact may have been dropped.
+   - Each fact is marked **Appears preserved**, **Needs review** or **Possible mismatch**, with the source span shown next to it.
+3. **Compress (KV Lab).** The same story-plus-verify workload runs with Gemma's KV cache at `f16`, `q8_0` and `q4_0`. The lab records memory, speed and how many facts survive. The question it answers is how much memory can be saved before the model starts forgetting facts.
 
 ### Key Features
 
@@ -48,152 +48,205 @@ Compress (KV Lab). The same story-plus-verify workload runs with Gemma's KV cach
 - A faithfulness report on every story, with per-fact evidence and no blanket "verified" badge.
 - KV Cache Lab: memory, tokens/s and fact retention across KV-cache precisions, measured on real hardware.
 - Fully local through Ollama, with structured JSON outputs validated by Pydantic.
-
 ## Innovation and Differentiation
 
-Reasoned links instead of similarity scores. Tools like Obsidian Smart Connections, Mem and Reflect surface "related notes" by embedding similarity. newNectore explains why two notes relate and how (cause, contradiction, same mechanism). It can find cross-domain links that share no vocabulary, because the tagging step extracts abstract patterns, not just keywords.
-
-An AI that audits itself. Most note apps hand you an AI summary and ask for trust. newNectore shows which facts from your notes survived in the summary and flags the ones that may not have.
-One metric that ties it together. We reuse the fact-preservation check as the quality metric for KV-cache compression. Instead of reporting only abstract numbers like KL divergence, the lab asks a user-level question: did compressing the cache make Gemma drop a fact from your notes?
-Built for student hardware. Gemma 4 E4B runs on a laptop. The KV Lab shows the memory/quality trade-off on the actual machine running the app.
+- **Reasoned links instead of similarity scores.** Tools like Obsidian Smart Connections, Mem and Reflect surface "related notes" by embedding similarity. newNectore explains *why* two notes relate and *how* (cause, contradiction, same mechanism). It can find cross-domain links that share no vocabulary, because the tagging step extracts abstract patterns, not just keywords.
+- **An AI that audits itself.** Most note apps hand you an AI summary and ask for trust. newNectore shows which facts from your notes survived in the summary and flags the ones that may not have.
+- **One metric that ties it together.** We reuse the fact-preservation check as the quality metric for KV-cache compression. Instead of reporting only abstract numbers like KL divergence, the lab asks a user-level question: did compressing the cache make Gemma drop a fact from your notes?
+- **Built for student hardware.** Gemma 4 E4B runs on a laptop. The KV Lab shows the memory/quality trade-off on the actual machine running the app.
 
 ## Technical Implementation
 
 ### Architecture
 
-[Add the system architecture or workflow Mermaid diagram here.]
+```mermaid
+flowchart LR
+    U[User note] --> T[Tag<br/>Gemma 4 → JSON<br/>entities + patterns]
+    T --> DB[(SQLite<br/>notes · entities · links)]
+    T --> S[Shortlist<br/>SQL concept match<br/>max 8 candidates]
+    DB --> S
+    S --> L[Link judge<br/>Gemma 4, one batched call<br/>type · strength · reason]
+    L --> F{strength ≥ 4<br/>and valid note id?}
+    F -->|yes| DB
+    DB --> TH[Threads<br/>walk links, sort by date]
+    TH --> ST[Story<br/>Gemma 4 narrative]
+    ST --> V[Verifier<br/>regex cue diff + fact quiz]
+    TH --> V
+    V --> UI[Streamlit UI<br/>Notes · Threads · Story + Report · KV Lab]
+    subgraph KV Lab
+      R[run_lab.py<br/>restart Ollama with<br/>f16 / q8_0 / q4_0] --> W[Same story + verify workload<br/>long context]
+      W --> M[/api/ps memory · tok/s · facts preserved/]
+      M --> CSV[(results.csv)]
+    end
+    CSV --> UI
+```
 
 ### Technology Stack
 
-
-| Category        | Technologies                |
-| --------------- | --------------------------- |
-| Frontend        | [Technologies / N/A]        |
-| Backend         | [Technologies / N/A]        |
-| Database        | [Technologies / N/A]        |
-| AI / ML         | [Models / frameworks / N/A] |
-| Infrastructure  | [Technologies / N/A]        |
-| APIs / Services | [Services / N/A]            |
-
-
-If a category or technology is not implemented in the project, specify `N/A` instead of leaving the field blank.
+| Category        | Technologies |
+| --------------- | ------------ |
+| Frontend        | Streamlit |
+| Backend         | Python 3.11+, Ollama HTTP API |
+| Database        | SQLite |
+| AI / ML         | Gemma 4 (`gemma4:e4b` by default, configurable) via Ollama; Pydantic for structured-output validation |
+| Infrastructure  | Local machine (Ollama server) |
+| APIs / Services | N/A, no external services |
 
 ### How It Works
 
-[Explain the major components of the system and how they interact.]
+**Note pipeline (two Gemma calls per note)**
+
+1. **Tagging:** Gemma 4 returns `{summary, entities[], patterns[]}` against a JSON schema. Entity names are normalised (e.g. "Reserve Bank of India" → "RBI").
+2. **Shortlisting:** a plain SQL query finds older notes that share an entity or pattern, capped at 8 candidates. No AI is used here, so it's fast and free.
+3. **Linking:** one batched Gemma call judges all candidates and returns a list of `{note_id, type, strength, reason}`.
+4. **Filtering:** a link is saved only if `strength ≥ 4`, the type is valid and `note_id` was in the shortlist, so the model cannot invent links. Zero links is a valid result.
+
+**Threads** are not stored. They are computed by walking saved links and sorting by date. **Story** sends one thread to Gemma 4 and streams the narrative.
+
+**Verifier**
+
+- `verify/cues.py`: a regex extractor for numbers + units, dates, negations, conditions, bounds and obligation words. It diffs the counts between the sources and the generated text.
+- `verify/quiz.py`: Gemma extracts must-keep facts from the source notes with source spans and a question for each. A second call answers each question from the generated text only, returning an answer or "not stated".
+- Signals are combined per fact into *Appears preserved* / *Needs review* / *Possible mismatch*. There is no single overall score.
+
+**KV Cache Lab**
+
+- `lab/run_lab.py` restarts `ollama serve` with `OLLAMA_KV_CACHE_TYPE` set to `f16`, `q8_0` and `q4_0` in turn, with `OLLAMA_FLASH_ATTENTION=1`.
+- For each setting it runs a fixed long-context workload: a large thread plus padding notes, `num_ctx` 32K, temperature 0, fixed seed.
+- It records memory from `/api/ps`, speed from `eval_count / eval_duration`, the facts preserved by the verifier, and agreement with the `f16` output. Results go to `lab/results/results.csv`.
+- The Streamlit **KV Lab** tab plots those results. All numbers shown come from runs on our machine.
 
 ### Technical Decisions
 
-[Explain important architectural, algorithmic, or engineering decisions made during development.]
-
+- **Ollama instead of a Hugging Face fake-quant pipeline.** Ollama applies real KV-cache quantization to the model we already serve, and finishes in hours rather than days. The trade-off is that Ollama sets K and V precision together. Separate K/V testing (K8/V4 vs K4/V8) needs `llama-server` with `--cache-type-k/--cache-type-v`, which is future work.
+- **Two Gemma calls per note, not N+1.** Candidates are judged in one batched call, which keeps adding a note fast on a laptop.
+- **Structured outputs are always validated.** Ollama's JSON-schema `format` is used with `think: false`. Every response is validated with Pydantic and retried once, and a failure is shown to the user rather than written to the database. The Ollama version we tested with is listed under Setup.
+- **Strict linking.** A high threshold keeps the graph clean, so users don't wade through weak "both are about tech" links.
+- **Evidence, not certification.** The verifier says "appears preserved", never "verified" or "safe". It can miss errors and raise false alarms, and the UI says so.
 ## Implementation During the Hackathon
 
-[Describe what the team built during the Hack Day and the major functionality or components completed during the event.]
+_To be updated during the event. Only list what was actually built._
+
+- [ ] Note pipeline: tagging, shortlist, batched linking, filtering
+- [ ] Threads and streamed story mode
+- [ ] Verifier: regex cue diff and fact quiz, plus a per-fact report UI
+- [ ] KV Cache Lab: run script, CSV output, dashboard tab
+- [ ] Seed notes for the demo
 
 ### Team Contributions
 
 - **[Member Name]:** [Contribution]
 - **[Member Name]:** [Contribution]
 - **[Member Name]:** [Contribution]
-- **[Member Name]:** [Contribution]
 
 ## Working Application
 
-**Live Application:** [Live URL]
-
-[Briefly explain how the deployed application can be accessed and what functionality can be tested.]
-
-The submitted application should be functional and accessible through the provided link where applicable.
+**Live Application:** Runs locally (requires Ollama + Gemma 4). See Setup.
 
 ## Demo Video
 
 **Demo Video:** [Video URL]
 
-[Provide a short demonstration of the working project, covering the main user flow and important functionality.]
+## KV Cache Lab Results
+
+_Filled in from `lab/results/results.csv` after running the lab. Nothing here is estimated._
+
+| KV cache type | Context (tokens) | Memory (`/api/ps`) | Tokens/s | Facts preserved | Matches f16 output |
+| ------------- | ---------------- | ------------------ | -------- | --------------- | ------------------ |
+| f16  | | | | | |
+| q8_0 | | | | | |
+| q4_0 | | | | | |
+
+**Hypothesis (from prior work, not yet our result):** KIVI and KVQuant found that keys contain outlier channels and are more sensitive to quantization than values, and LocalBench reports that Gemma 4 degrades more than other model families under KV quantization. We expect `q8_0` to keep most facts and `q4_0` to drop some at long context. Sample sizes are small, so we report raw counts and do not claim statistical significance.
 
 ## Open Source and AI Usage
 
 ### AI / Models
 
-- **[Model]:** [How it is used]
+- **Gemma 4** (Google DeepMind, open weights, Apache 2.0): the only model in the app. It does four jobs:
+  - tagging notes (entities and patterns)
+  - judging and explaining links
+  - narrating threads as stories
+  - extracting facts and answering quiz questions for the verifier
+
+  It is also the subject of the KV Cache Lab.
 
 ### Open Source Components
 
-- **[Library / Framework]:** [Purpose]
-- **[Dataset]:** [Purpose]
-- **[API / Service]:** [Purpose]
+- **[Ollama](https://github.com/ollama/ollama)** (MIT): local model serving, structured outputs and KV-cache quantization.
+- **[Streamlit](https://github.com/streamlit/streamlit)** (Apache 2.0): UI.
+- **[Pydantic](https://github.com/pydantic/pydantic)** (MIT): schema validation of model outputs.
+- **SQLite** (public domain): storage.
+- **requests / httpx**: Ollama HTTP client.
 
-[Include relevant licenses, attribution, and acknowledgements for external components.]
+### Ideas and research we build on
 
+- QAGS-style question-answering faithfulness checks (Wang et al., 2020): the inspiration for the fact quiz.
+- KIVI (arXiv:2402.02750) and KVQuant (arXiv:2401.18079): prior work on K vs V sensitivity in KV-cache quantization.
+- LocalBench KV-cache quantization benchmark: a community report on Gemma 4's sensitivity.
 ## Setup and Usage
 
 ### Prerequisites
 
-- [Requirement]
-- [Requirement]
+- Python 3.11+
+- [Ollama](https://ollama.com) (tested with version: `[fill in: ollama --version]`)
+- Gemma 4 pulled locally: `ollama pull gemma4:e4b`
+- About 8 GB of free RAM/VRAM for E4B
 
 ### Installation
 
 ```bash
-git clone [repository-url]
-cd [project-directory]
-[installation-command]
+git clone https://github.com/chuckstone-cpu/hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat.git
+cd hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
 ```
 
 ### Environment Variables
 
 ```env
-[VARIABLE_NAME]=[value]
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=gemma4:e4b
+NUM_CTX=16384
+DB_PATH=nectore.db
 ```
-
-
 
 ### Running the Project
 
 ```bash
-[run-command]
+ollama serve                      # in one terminal
+python scripts/seed.py            # optional: load demo notes
+streamlit run app.py
+```
+
+Run the KV Cache Lab (this restarts the Ollama server three times):
+
+```bash
+python lab/run_lab.py --model gemma4:e4b --ctx 32768
 ```
 
 ### Usage
 
-[Explain the basic steps required to use the project.]
+1. **Notes tab:** write a note and press Save. Tags and any new links appear immediately.
+2. **Threads tab:** pick a thread and press **Tell the story**.
+3. Under the story, open the **Faithfulness report** to see each fact from your notes and whether it survived.
+4. **KV Lab tab:** view memory, speed and fact retention for f16 / q8_0 / q4_0 from your last lab run.
+
+## Challenges and Learnings
+
+_To be filled in after the event._
 
 ## Devpost Submission
 
 **Devpost Project:** [Devpost Project URL]
 
-[Add the link to the team's Devpost submission. Ensure the Devpost project page is complete and contains the required project information, links, media, and team details.]
-
 ## Credits and License
 
 ### Credits
 
-[Credit libraries, frameworks, datasets, models, APIs, contributors, and other external resources used.]
+Gemma 4 by Google DeepMind · Ollama · Streamlit · Pydantic · SQLite. Research credits are listed above.
 
 ### License
 
-[License name and/or link.]
-
-## Submission Checklist
-
-- [ ] Project title and description added
-- [ ] All team members listed
-- [ ] Problem clearly explained
-- [ ] Reason for choosing the problem explained
-- [ ] Solution and key features documented
-- [ ] Innovation and differentiation explained
-- [ ] Architecture included
-- [ ] Technical implementation documented
-- [ ] Work completed during the hackathon documented
-- [ ] Team contributions documented
-- [ ] Working application is functional
-- [ ] Live application link added where applicable
-- [ ] Demo video added
-- [ ] AI and open-source components documented
-- [ ] Setup and usage instructions tested
-- [ ] Challenges and learnings documented
-- [ ] Devpost submission completed
-- [ ] Devpost link added
-- [ ] Credits added
-- [ ] License added
-- [ ] Repository is organized and complete
+MIT. See `LICENSE`. Gemma 4 model weights are distributed under their own license (Apache 2.0).
