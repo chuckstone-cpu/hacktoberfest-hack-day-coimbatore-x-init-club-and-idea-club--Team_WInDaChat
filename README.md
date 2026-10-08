@@ -209,7 +209,6 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 ```bash
 git clone https://github.com/chuckstone-cpu/hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat.git
 cd hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat
-git checkout Aravind     # the Node app lives on this branch
 npm install              # installs the server + client workspaces
 cp .env.example .env
 ```
