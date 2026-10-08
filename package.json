@@ -7,7 +7,8 @@
     "client"
   ],
   "scripts": {
-    "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev -w server\" \"npm run dev -w client\""
+    "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "seed": "npm run seed -w server"
   },
   "engines": {
     "node": ">=20"

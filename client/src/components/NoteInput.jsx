@@ -33,13 +33,13 @@ export default function NoteInput({ onSave }) {
           value={text}
           onChange={(e) => { setText(e.target.value); setError(''); }}
           maxLength={MAX_LEN}
-          placeholder="Write a note and press Enter…"
+          placeholder={saving ? 'Gemma is tagging and linking your note…' : 'Write a note and press Enter…'}
           readOnly={saving}
           autoFocus
           className={`flex-1 rounded-lg border border-edge bg-canvas px-4 py-2.5 text-sm outline-none placeholder:text-muted focus:border-accent ${saving ? 'opacity-60' : ''}`}
         />
         <span className="w-20 text-right text-xs tabular-nums text-muted">
-          {text.length}/{MAX_LEN}
+          {saving ? <span className="animate-pulse text-accent">thinking…</span> : `${text.length}/${MAX_LEN}`}
         </span>
       </div>
       {error && <p className="mx-auto mt-2 max-w-3xl text-xs text-red-400">{error}</p>}

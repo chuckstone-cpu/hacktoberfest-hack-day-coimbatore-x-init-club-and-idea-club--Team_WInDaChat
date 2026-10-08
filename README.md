@@ -156,8 +156,11 @@ PORT=3001                            # API port; the UI proxies /api here
 
 ```bash
 ollama serve         # if Ollama isn't already running
+npm run seed         # optional: reset the database and load 10 demo notes
 npm run dev          # API on :3001, UI on http://localhost:5173
 ```
+
+`npm run seed` deletes everything in the database before loading the demo notes.
 
 ### Usage
 
