@@ -10,10 +10,10 @@ Everything runs on a laptop through Ollama. No cloud API, and your notes never l
 
 | Member | Contribution |
 | ------ | ------------ |
-| Sahesh Karthikeyan | Database and infrastructure |
-| Siva Krithick | Inference engine and quantization |
-| V Aravindhan | Programmatic verification |
-| Sathyanarayanan | Core logic, API, and synthesis |
+| V Aravindhan | Project lead; built the Node + React app, Gemma pipeline, verifier, and UI |
+| Siva Krithick | Initial project scaffold, first README documentation, and early knowledge-graph prototype |
+| Sahesh Karthikeyan | Repository cleanup on `main` to make way for the final app |
+| Sathyanarayanan | Python fact-verification prototype and frontend UI exploration |
 
 ## Problem Statement
 
@@ -139,10 +139,10 @@ The KV Lab measures the current connected-note workload on the local machine; re
 
 ### Team Contributions
 
-- **Sahesh Karthikeyan:** Database and infrastructure.
-- **Siva Krithick:** Inference engine and quantization.
-- **V Aravindhan:** Programmatic verification.
-- **Sathyanarayanan:** Core logic, API, and narrative synthesis.
+- **V Aravindhan:** Led the project and built the working app step by step: the Node + Express API and React client; notes stored in SQLite and shown as a live force graph; Gemma 4 tagging, shortlisting and batched linking with Zod-validated JSON; threads and the streamed story; the faithfulness verifier (cue check + fact quiz) with its demo mode; drag-to-connect; the fresh-clone install fix (switching to `node:sqlite`); the Paper & Ink UI revamp (scrollable home, coloured tags, React Bits carousel); the README and hack log; and merging everything into `main`.
+- **Siva Krithick:** Scaffolded the initial project structure and configuration, wrote the first README project documentation, and built an early local knowledge-graph workspace prototype.
+- **Sahesh Karthikeyan:** Cleaned up `main` by removing the obsolete Python prototype, data folders and old config, so the final Node app could be merged cleanly.
+- **Sathyanarayanan:** Built the Python fact-verification prototype (spaCy fact extraction plus rule checks for numbers, negations and conditions), whose condition-word list was ported into the app's verifier, and explored an alternative frontend UI.
 
 ## Working Application
 
