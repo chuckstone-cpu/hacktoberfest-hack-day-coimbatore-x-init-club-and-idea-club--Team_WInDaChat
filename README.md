@@ -39,7 +39,9 @@ Connectore has two parts, both built on one local Gemma 4 model.
 
 ### Key Features
 
+- A single scrollable page in a warm "Paper & Ink" theme: Hero (with a carousel of your newest notes), Notes, Graph and Add sections, with a sticky nav.
 - One input box. No folders, tags or manual linking.
+- A searchable notes grid with deterministic coloured tags (the same tag is always the same colour; patterns are filled, entities outlined) and tag filters.
 - A live knowledge graph: notes are glowing nodes, links are coloured by relation type, and new notes animate in and connect.
 - Cross-subject links with a typed relation and a human-readable reason (hover a link to read it).
 - Drag to connect: drop one note onto another and Gemma judges the pair, then draws the link or explains why they aren't related.
@@ -81,7 +83,7 @@ flowchart LR
 
 | Category        | Technologies |
 | --------------- | ------------ |
-| Frontend        | React 19 + Vite 8, Tailwind CSS 4, `react-force-graph-2d` (knowledge graph), `d3-force` |
+| Frontend        | React 19 + Vite 8, Tailwind CSS 4, `react-force-graph-2d` (knowledge graph), `d3-force`, React Bits Carousel + Motion |
 | Backend         | Node.js 22.13+ (developed on 24), Express 5, `ollama` JS client |
 | Database        | SQLite via Node's built-in `node:sqlite` |
 | AI / ML         | Gemma 4 (`gemma4:e4b` by default, configurable) served locally by Ollama; Zod for structured-output schemas and validation |
@@ -236,8 +238,9 @@ npm run dev          # API on :3001, UI on http://localhost:5173
 
 ### Usage
 
-1. **Write a note** in the input bar and press Enter. Gemma tags it, and it appears as a new node; any links draw in with their reasons (hover a link to read it).
-2. **Click a node** to open the side panel: its summary, tags, links and thread. Its thread lights up in the graph.
+1. **Write a note** in the Add section and press Save (or Ctrl/⌘ + Enter). Gemma's summary, tags and links appear under the box; "See it in the graph" jumps to it.
+2. **Browse notes** in the Notes section: search, or click a tag to filter. Click a card, a carousel card or a graph node (click into the graph first to zoom and pan)
+   to open the side panel: its summary, tags, links and thread. Its thread lights up in the graph.
 3. Press **Tell the story** to stream a story that connects the thread.
 4. Press **Check faithfulness** under the story to see each fact from your notes and whether it survived. On the library-rule demo note, tick **Use sabotaged story (demo)** to see the red flags.
 5. **Drag one note onto another** to ask Gemma whether they are connected.

@@ -55,3 +55,10 @@ What was built, step by step (see `docs/BUILD_GUIDE.md` section 7). Everything h
 - README rewritten from what was actually built and measured; team contributions, demo video and Devpost links are left for the team to fill in.
 - Internal-only helpers made module-private; no debug code left in the client.
 - Fresh-clone test (`git clone` → `npm install` → `npm run seed` → `npm run dev`) caught a real problem: `better-sqlite3` 13 ships prebuilt binaries but also a `binding.gyp`, so npm ran `node-gyp rebuild` on a fresh install and failed without Visual Studio C++ tools. Switched to Node's built-in `node:sqlite` (Node ≥ 22.13), which removes the native dependency; the npm scripts pass `--disable-warning=ExperimentalWarning` to hide its one-time warning.
+
+## UI revamp (branch ui-revamp)
+- Paper & Ink light theme from CSS-variable tokens; colours that missed WCAG contrast (amber text, ochre/coral lines) were darkened.
+- One scrollable page: sticky nav with scroll-tracked active link, Hero, Notes (search + tag filters, masonry cards), Graph (only captures the wheel after a click, so the page scrolls past it) and Add (inline result, "See it in the graph").
+- Deterministic tag colours from a 10-entry palette checked for contrast; graph nodes take their most-shared pattern's colour.
+- React Bits' CircularCarousel only renders images, so the team chose React Bits' text Carousel for the hero instead (installed with the shadcn CLI; react-icons removed as unused).
+- Skipped for time: the optional polish pass (paper grain, hover lift, count-up, Lighthouse audit).
