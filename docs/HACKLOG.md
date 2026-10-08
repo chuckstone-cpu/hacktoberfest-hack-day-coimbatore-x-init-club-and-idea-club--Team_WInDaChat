@@ -43,3 +43,10 @@ What was built, step by step (see `docs/BUILD_GUIDE.md` section 7). Everything h
   - Sabotaged library story: 3 possible mismatch ("unless someone else has reserved the book", "₹2 per day", "14-day"), 1 needs review ("at most twice"); cue check flags "at most", "unless", "₹2", "14-day". ~7.7 s.
   - Real 6-note feedback story: 7 facts, all "Appears preserved", 0 cue issues. ~17.6 s.
 - If the quiz fails, the API still returns the cue check with a `quizError`.
+
+## Step 9: Drag to connect
+- Dropping one node onto another (within ~20 screen px) calls `POST /api/connect`. One Gemma call judges just that pair with the same link rules; it is saved with `origin='manual'` only if strength ≥ 4. Pairs that are already linked return the existing link without a model call.
+- While Gemma thinks, a dashed line joins the two nodes; on a rejection it fades out red. The dragged node springs back to where the drag started.
+- Problem found: when rejecting a pair, Gemma's single `reason` often argued *for* a similarity ("both describe feedback…"). Fix: the pair schema now asks for both `reason` (strongest link) and `difference` (what separates them); rejections show `difference`.
+- Results on our machine (seeded notes, ~1.5 s per judgement): photosynthesis ↔ TCP → no strong connection (2/5, "energy conversion in chloroplasts" vs "network flow control"); gradient descent ↔ blood sugar → linked, same idea 4/5; deadlock ↔ RBI → 1/5.
+- User-suggested pairs sometimes score higher than the same pair did during automatic linking (RBI ↔ TCP: 2/5 automatic, 4/5 when dragged), so manual links are marked `origin='manual'` in the database.

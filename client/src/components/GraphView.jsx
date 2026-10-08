@@ -8,6 +8,7 @@ const UNTAGGED_COLOR = '#71717a';
 const PULSE_MS = 2000;
 const LABEL_ZOOM = 0.9;
 const DIM_ALPHA = 0.15;
+export const REJECT_FADE_MS = 1500;
 
 const idOf = (end) => (typeof end === 'object' ? end.id : end);
 
@@ -27,12 +28,16 @@ function linkTooltip(l) {
 
 // focusIds: notes to keep bright (the open thread); everything else dims.
 // Hovering a node temporarily focuses it and its direct neighbours instead.
-export default function GraphView({ data, selectedId, focusIds, newNodeId, onSelect }) {
+// Dropping one node onto another calls onConnect(a, b); `pending` is that
+// request's state ({ a, b, status: 'thinking' | 'rejected', at }).
+export default function GraphView({ data, selectedId, focusIds, newNodeId, pending, onSelect, onConnect }) {
   const wrapRef = useRef(null);
   const fgRef = useRef(null);
   const fittedRef = useRef(false);
+  const dragRef = useRef(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [hoverId, setHoverId] = useState(null);
+  const [dropTargetId, setDropTargetId] = useState(null);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -101,6 +106,15 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, onSel
       }
     }
 
+    // Drop target while dragging: a ring saying "release to connect".
+    if (node.id === dropTargetId) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, r + 6 / scale, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#ddd6fe';
+      ctx.lineWidth = 2 / scale;
+      ctx.stroke();
+    }
+
     const color = node.summary ? NODE_COLOR : UNTAGGED_COLOR;
     ctx.shadowColor = color;
     ctx.shadowBlur = active ? 24 : lit ? 12 : 0;
@@ -130,6 +144,64 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, onSel
 
   const linkLit = (l) => isLit(idOf(l.source)) && isLit(idOf(l.target));
 
+  // The nearest other node within ~20 screen pixels of the dragged one.
+  const dropTargetFor = (dragged) => {
+    const zoom = fgRef.current?.zoom() ?? 1;
+    let best = null;
+    let bestDist = Infinity;
+    for (const n of data.nodes) {
+      if (n.id === dragged.id) continue;
+      const d = Math.hypot(n.x - dragged.x, n.y - dragged.y);
+      if (d < radius(n) + 20 / zoom && d < bestDist) {
+        best = n;
+        bestDist = d;
+      }
+    }
+    return best;
+  };
+
+  const handleDrag = (node) => {
+    // Remember where the drag started so the node can spring back.
+    if (dragRef.current?.id !== node.id) dragRef.current = { id: node.id, x: node.x, y: node.y };
+    setDropTargetId(dropTargetFor(node)?.id ?? null);
+  };
+
+  const handleDragEnd = (node) => {
+    const start = dragRef.current;
+    const target = dropTargetFor(node);
+    dragRef.current = null;
+    setDropTargetId(null);
+    // Spring back: unpin the node and return it to where the drag began.
+    node.fx = undefined;
+    node.fy = undefined;
+    if (start?.id === node.id) {
+      node.x = start.x;
+      node.y = start.y;
+    }
+    fgRef.current?.d3ReheatSimulation();
+    if (target) onConnect(node.id, target.id);
+  };
+
+  // Dashed line between the pair Gemma is judging; it fades out on a rejection.
+  const drawPending = (ctx, scale) => {
+    if (!pending) return;
+    const a = data.nodes.find((n) => n.id === pending.a);
+    const b = data.nodes.find((n) => n.id === pending.b);
+    if (!a || !b) return;
+    const alpha = pending.status === 'rejected' ? Math.max(0, 1 - (performance.now() - pending.at) / REJECT_FADE_MS) : 0.9;
+    if (alpha <= 0) return;
+    ctx.save();
+    ctx.setLineDash([4 / scale, 4 / scale]);
+    ctx.lineDashOffset = -(performance.now() / 40) / scale; // marching ants while thinking
+    ctx.strokeStyle = pending.status === 'rejected' ? `rgba(248, 113, 113, ${alpha})` : `rgba(221, 214, 254, ${alpha})`;
+    ctx.lineWidth = 1.5 / scale;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    ctx.restore();
+  };
+
   return (
     <div ref={wrapRef} className="absolute inset-0">
       {ready && (
@@ -151,6 +223,9 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, onSel
           onNodeHover={(n) => setHoverId(n?.id ?? null)}
           onNodeClick={(n) => onSelect(n.id)}
           onBackgroundClick={() => onSelect(null)}
+          onNodeDrag={handleDrag}
+          onNodeDragEnd={handleDragEnd}
+          onRenderFramePost={drawPending}
           onEngineStop={() => {
             if (!fittedRef.current && data.nodes.length) {
               fgRef.current?.zoomToFit(400, 80);

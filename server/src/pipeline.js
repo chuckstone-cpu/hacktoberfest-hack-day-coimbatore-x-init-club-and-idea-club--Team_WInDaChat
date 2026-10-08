@@ -1,7 +1,7 @@
 import { callJson } from './llm.js';
-import { linkMessages, tagMessages } from './prompts.js';
-import { LinkResult, TagResult } from './schemas.js';
-import { createNote, getNoteTerms, saveLink, saveTags, shortlist } from './db.js';
+import { linkMessages, pairMessages, tagMessages } from './prompts.js';
+import { LinkResult, PairResult, TagResult } from './schemas.js';
+import { createNote, getLinkBetween, getNote, getNoteTerms, saveLink, saveTags, shortlist } from './db.js';
 
 const MAX_CANDIDATES = 8;
 const MIN_STRENGTH = 4;
@@ -91,4 +91,27 @@ export async function addNote(text) {
     result.linkError = 'Gemma could not link this note.';
   }
   return result;
+}
+
+// Drag-to-connect: Gemma judges one pair the user dropped together. Saved
+// with origin 'manual' only if it passes the same strength threshold.
+export async function connectNotes(aId, bId) {
+  const [older, newer] = [getNote(aId), getNote(bId)].sort((x, y) => x.created_at.localeCompare(y.created_at) || x.id - y.id);
+
+  const existing = getLinkBetween(older.id, newer.id);
+  if (existing) return { linked: true, existing: true, link: existing };
+
+  const judged = await callJson(PairResult, pairMessages(older, newer), { label: 'connect' });
+  const link = {
+    src: newer.id,
+    dst: older.id,
+    type: judged.type,
+    strength: judged.strength,
+    reason: judged.reason.trim(),
+    origin: 'manual',
+  };
+  // For a rejection, show what separates the notes, not the (weak) similarity.
+  if (link.strength < MIN_STRENGTH) return { linked: false, strength: link.strength, reason: judged.difference.trim() };
+  saveLink(link);
+  return { linked: true, existing: false, link };
 }

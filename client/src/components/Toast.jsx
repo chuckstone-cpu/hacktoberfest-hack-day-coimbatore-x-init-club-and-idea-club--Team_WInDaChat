@@ -12,6 +12,7 @@ export default function Toast({ toast, nodesById, onClose }) {
   }, [toast, onClose]);
 
   if (!toast) return null;
+  if (toast.connect) return <ConnectToast c={toast.connect} nodesById={nodesById} onClose={onClose} />;
   const { summary, terms, links, tagError, linkError } = toast;
   const warn = tagError || linkError;
 
@@ -46,6 +47,51 @@ export default function Toast({ toast, nodesById, onClose }) {
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ConnectToast({ c, nodesById, onClose }) {
+  const name = (id) => {
+    const label = nodesById.get(id)?.label ?? `Note #${id}`;
+    return label.length > 40 ? `${label.slice(0, 39)}…` : label;
+  };
+  let border = 'border-accent/40';
+  let body;
+  if (c.error) {
+    border = 'border-amber-500/50';
+    body = <p className="text-sm text-amber-300">{c.error}</p>;
+  } else if (c.linked) {
+    body = (
+      <>
+        <p className="text-sm">
+          {c.existing ? 'Already linked: ' : 'Gemma linked these notes: '}
+          <span style={{ color: linkColor(c.link.type) }}>{linkLabel(c.link.type)}</span>
+          <span className="text-muted"> · {c.link.strength}/5</span>
+        </p>
+        <p className="text-xs text-muted">{c.link.reason}</p>
+      </>
+    );
+  } else {
+    border = 'border-red-500/40';
+    body = (
+      <>
+        <p className="text-sm">
+          Gemma: no strong connection <span className="text-muted">· {c.strength}/5</span>
+        </p>
+        <p className="text-xs text-muted">{c.reason}</p>
+      </>
+    );
+  }
+  return (
+    <div className="absolute left-1/2 top-4 z-20 w-[min(32rem,calc(100%-2rem))] -translate-x-1/2">
+      <div className={`flex flex-col gap-1.5 rounded-xl border bg-panel/95 p-4 shadow-xl backdrop-blur ${border}`}>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-[11px] text-muted">{name(c.a)} ↔ {name(c.b)}</p>
+          <button onClick={onClose} className="text-muted hover:text-ink" aria-label="Dismiss">✕</button>
+        </div>
+        {body}
       </div>
     </div>
   );

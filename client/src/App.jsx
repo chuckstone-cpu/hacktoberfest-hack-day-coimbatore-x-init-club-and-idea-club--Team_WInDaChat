@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import StatusPill from './components/StatusPill.jsx';
-import GraphView from './components/GraphView.jsx';
+import GraphView, { REJECT_FADE_MS } from './components/GraphView.jsx';
 import Legend from './components/Legend.jsx';
 import NoteInput from './components/NoteInput.jsx';
 import SidePanel from './components/SidePanel.jsx';
 import Toast from './components/Toast.jsx';
-import { createNote, getGraph, getThread } from './api.js';
+import { connectPair, createNote, getGraph, getThread } from './api.js';
 
 const idOf = (end) => (typeof end === 'object' ? end.id : end);
 
@@ -28,6 +28,7 @@ export default function App() {
   const [threadError, setThreadError] = useState('');
   const [newNodeId, setNewNodeId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [pending, setPending] = useState(null);
   const closeToast = useCallback(() => setToast(null), []);
 
   useEffect(() => {
@@ -75,6 +76,29 @@ export default function App() {
     setToast({ summary: note.summary, terms, links, tagError, linkError });
   };
 
+  // Drag-to-connect: Gemma judges the dropped pair; a new link joins the graph.
+  const connect = async (a, b) => {
+    if (pending?.status === 'thinking') return;
+    setPending({ a, b, status: 'thinking' });
+    try {
+      const r = await connectPair(a, b);
+      if (r.linked && !r.existing) {
+        const l = r.link;
+        setGraph((g) => ({ nodes: g.nodes, links: [...g.links, { ...l, source: l.src, target: l.dst }] }));
+      }
+      if (r.linked) {
+        setPending(null);
+      } else {
+        setPending({ a, b, status: 'rejected', at: performance.now() });
+        setTimeout(() => setPending((p) => (p?.a === a && p?.b === b ? null : p)), REJECT_FADE_MS);
+      }
+      setToast({ connect: { a, b, ...r } });
+    } catch (err) {
+      setPending(null);
+      setToast({ connect: { a, b, error: err.message } });
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center justify-between border-b border-edge px-5 py-3">
@@ -96,7 +120,9 @@ export default function App() {
           selectedId={selectedId}
           focusIds={focusIds}
           newNodeId={newNodeId}
+          pending={pending}
           onSelect={setSelectedId}
+          onConnect={connect}
         />
         <Legend />
         <SidePanel

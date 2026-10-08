@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { config } from './config.js';
 import { getOllamaVersion, warmUp } from './llm.js';
 import { getGraph, getNote, listNotes } from './db.js';
-import { addNote } from './pipeline.js';
+import { addNote, connectNotes } from './pipeline.js';
 import { getThread } from './threads.js';
 import { streamStory } from './story.js';
 import { diffCues } from './verify/cues.js';
@@ -30,6 +30,11 @@ const VerifyInput = z.object({
   noteIds: z.array(z.number().int().positive()).min(1).max(8),
   text: z.string().trim().min(1).max(5000),
 });
+
+const ConnectInput = z.object({
+  a: z.number().int().positive(),
+  b: z.number().int().positive(),
+}).refine((v) => v.a !== v.b, 'Pick two different notes.');
 
 // Notes for the given ids, oldest first; unknown ids are skipped.
 function notesFor(ids) {
@@ -88,6 +93,20 @@ app.post('/api/story', async (req, res) => {
     if (!res.headersSent) {
       res.status(502).json({ error: 'Gemma could not write the story. Is Ollama running?' });
     }
+  }
+});
+
+app.post('/api/connect', async (req, res) => {
+  const parsed = ConnectInput.safeParse(req.body ?? {});
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+  const { a, b } = parsed.data;
+  if (!getNote(a) || !getNote(b)) return res.status(404).json({ error: 'Note not found.' });
+
+  try {
+    res.json(await connectNotes(a, b));
+  } catch (err) {
+    console.error(`[connect] ${a}↔${b} failed: ${err.message}`);
+    res.status(502).json({ error: 'Gemma could not judge this pair. Is Ollama running?' });
   }
 });
 

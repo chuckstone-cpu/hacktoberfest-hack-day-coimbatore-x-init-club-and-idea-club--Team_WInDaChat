@@ -50,3 +50,10 @@ export const AnswerList = z.object({
     )
     .max(8),
 });
+
+export const PairResult = z.object({
+  type: z.enum(LINK_TYPES),
+  strength: z.number().int().min(1).max(5),
+  reason: z.string().min(1).max(250),
+  difference: z.string().min(1).max(250),
+});

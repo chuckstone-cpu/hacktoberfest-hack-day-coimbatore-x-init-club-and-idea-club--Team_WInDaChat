@@ -46,3 +46,10 @@ export const verifyText = (noteIds, text) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ noteIds, text }),
   });
+
+export const connectPair = (a, b) =>
+  request('/api/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ a, b }),
+  });

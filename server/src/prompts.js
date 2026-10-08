@@ -121,3 +121,28 @@ Rules:
     { role: 'user', content: `Text:\n${text}\n\nQuestions:\n${list}` },
   ];
 }
+
+// For drag-to-connect: the user proposes a pair, Gemma judges just that pair
+// with the same rules and strictness as automatic linking.
+export function pairMessages(older, newer) {
+  return [
+    {
+      role: 'system',
+      content: `You judge whether two study notes are genuinely connected. Reply with JSON only:
+{"type": string, "strength": number, "reason": string, "difference": string}
+
+The user suggested this pair, but do not lower your standards for that. A vague similarity ("both involve regulation", "both are processes") is NOT a connection.
+- reason: the strongest specific link you can find, citing a fact from each note (at most 25 words).
+- difference: what each note is actually about and the most important way they differ (at most 25 words).
+- strength: judge honestly using the scale below. Most user-suggested pairs are NOT strongly connected.
+- In reason and difference, refer to the notes by their topics (e.g. "TCP", "photosynthesis"), never as "the new note" or "the older note".
+
+${LINK_RULES}`,
+    },
+    { role: 'user', content: `NEW note:
+${newer.text}
+
+OLDER note:
+${older.text}` },
+  ];
+}

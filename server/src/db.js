@@ -73,6 +73,10 @@ const stmts = {
     INSERT OR IGNORE INTO links (src, dst, type, strength, reason, origin, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `),
+  linkBetween: db.prepare(`
+    SELECT src, dst, type, strength, reason, origin FROM links
+    WHERE (src = ? AND dst = ?) OR (src = ? AND dst = ?)
+  `),
   neighbours: db.prepare(`
     SELECT dst AS id FROM links WHERE src = ?
     UNION
@@ -111,6 +115,10 @@ export function shortlist(noteId, limit) {
 export function saveLink({ src, dst, type, strength, reason, origin }) {
   const { changes } = stmts.insertLink.run(src, dst, type, strength, reason, origin, new Date().toISOString());
   return changes > 0;
+}
+
+export function getLinkBetween(a, b) {
+  return stmts.linkBetween.get(a, b, b, a) ?? null;
 }
 
 export function getNeighbours(noteId) {
