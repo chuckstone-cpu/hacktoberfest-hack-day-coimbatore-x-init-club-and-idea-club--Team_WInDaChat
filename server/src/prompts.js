@@ -86,3 +86,38 @@ Rules:
     { role: 'user', content: `Notes:\n\n${list}` },
   ];
 }
+
+export function factMessages(sources) {
+  return [
+    {
+      role: 'system',
+      content: `You extract the must-keep facts from study notes, so a summary of them can be checked. Reply with JSON only:
+{"facts": [{"fact": string, "source_span": string, "category": string, "question": string}]}
+
+Rules:
+- At most 8 facts. Pick facts with numbers, dates, conditions ("unless", "only if"), exceptions, limits ("at most", "within"), negations and obligations FIRST, then the most important other claims.
+- source_span: an EXACT quote copied character for character from the notes, as short as possible while containing the fact.
+- category: one of number, date, negation, condition, exception, obligation, name, other.
+- question: a short question whose correct answer is this fact, e.g. "How many times can a book be renewed?".`,
+    },
+    { role: 'user', content: `Notes:\n\n${sources}` },
+  ];
+}
+
+export function answerMessages(text, questions) {
+  const list = questions.map((q, i) => `${i}. ${q}`).join('\n');
+  return [
+    {
+      role: 'system',
+      content: `You answer questions using ONLY the given text, never outside knowledge. Reply with JSON only:
+{"answers": [{"index": number, "answer": string, "evidence_quote": string | null}]}
+
+Rules:
+- One answer per question, with the question's index.
+- If the text does not state the answer, the answer must be exactly "not stated" and evidence_quote must be null.
+- Keep numbers, limits and conditions exactly as the text gives them; do not fill in details the text leaves vague.
+- evidence_quote: an EXACT quote from the text that supports the answer, or null.`,
+    },
+    { role: 'user', content: `Text:\n${text}\n\nQuestions:\n${list}` },
+  ];
+}

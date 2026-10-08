@@ -39,3 +39,10 @@ export async function streamStory(noteIds, onChunk, signal) {
     onChunk(decoder.decode(value, { stream: true }));
   }
 }
+
+export const verifyText = (noteIds, text) =>
+  request('/api/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ noteIds, text }),
+  });

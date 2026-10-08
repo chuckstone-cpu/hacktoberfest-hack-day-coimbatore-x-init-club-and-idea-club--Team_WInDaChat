@@ -23,3 +23,30 @@ export const LinkResult = z.object({
     )
     .max(8),
 });
+
+export const FACT_CATEGORIES = ['number', 'date', 'negation', 'condition', 'exception', 'obligation', 'name', 'other'];
+
+export const FactList = z.object({
+  facts: z
+    .array(
+      z.object({
+        fact: z.string().min(1).max(200),
+        source_span: z.string().min(1).max(300),
+        category: z.enum(FACT_CATEGORIES),
+        question: z.string().min(1).max(200),
+      }),
+    )
+    .max(8),
+});
+
+export const AnswerList = z.object({
+  answers: z
+    .array(
+      z.object({
+        index: z.number().int().min(0),
+        answer: z.string().min(1).max(200),
+        evidence_quote: z.string().max(300).nullable(),
+      }),
+    )
+    .max(8),
+});

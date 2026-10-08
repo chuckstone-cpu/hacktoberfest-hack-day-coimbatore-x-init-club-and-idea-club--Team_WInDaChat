@@ -34,3 +34,12 @@ What was built, step by step (see `docs/BUILD_GUIDE.md` section 7). Everything h
 ## Step 7: Threads + story
 - Threads are computed by BFS over links (depth ≤ 3, ≤ 8 notes), sorted by date. Clicking a node lights up its thread.
 - The story streams as plain text: first words after ~0.5 s, a 3-note story in ~4 s, a 6-note story under 10 s.
+
+## Step 8: Verifier and faithfulness report
+- `verify/cues.js` (no AI): extracts numbers with units/currency, dates, negations, conditions, bounds and obligations, and reports source cues that are missing or changed in the story. The condition words follow the team's Python prototype on `main` (`src/verification/extractor.py`). "by" from the guide's bound list is left out because it matches almost every sentence.
+- `verify/quiz.js`: Gemma extracts up to 8 must-keep facts with exact source quotes (facts whose quote isn't in the notes are dropped), then answers a question per fact using only the story. Evidence quotes not found in the story are discarded.
+- Per-fact status: "Possible mismatch" if the story doesn't state the fact or loses a number from it; "Needs review" if answered but a cue (e.g. "at most") is missing; otherwise "Appears preserved". Dropped numbers count as a mismatch, which is stricter than the guide's first draft ("numbers differ").
+- Results on our machine:
+  - Sabotaged library story: 3 possible mismatch ("unless someone else has reserved the book", "₹2 per day", "14-day"), 1 needs review ("at most twice"); cue check flags "at most", "unless", "₹2", "14-day". ~7.7 s.
+  - Real 6-note feedback story: 7 facts, all "Appears preserved", 0 cue issues. ~17.6 s.
+- If the quiz fails, the API still returns the cue check with a `quizError`.
