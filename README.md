@@ -129,29 +129,34 @@ The submitted application should be functional and accessible through the provid
 
 ### Prerequisites
 
-- [Requirement]
-- [Requirement]
+- Node.js 20+ (developed on Node 24)
+- [Ollama](https://ollama.com) (tested with version 0.40.1)
+- Gemma 4 pulled locally: `ollama pull gemma4:e4b`
 
 ### Installation
 
 ```bash
-git clone [repository-url]
-cd [project-directory]
-[installation-command]
+git clone https://github.com/chuckstone-cpu/hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat.git
+cd hacktoberfest-hack-day-coimbatore-x-init-club-and-idea-club--Team_WInDaChat
+npm install          # installs the server + client workspaces
+cp .env.example .env
 ```
 
 ### Environment Variables
 
 ```env
-[VARIABLE_NAME]=[value]
+OLLAMA_HOST=http://localhost:11434   # Ollama server
+OLLAMA_MODEL=gemma4:e4b              # model tag used for every call
+NUM_CTX=16384                        # context window passed on every request
+DB_PATH=nectore.db                   # SQLite file (created on first run)
+PORT=3001                            # API port; the UI proxies /api here
 ```
-
-
 
 ### Running the Project
 
 ```bash
-[run-command]
+ollama serve         # if Ollama isn't already running
+npm run dev          # API on :3001, UI on http://localhost:5173
 ```
 
 ### Usage
@@ -172,7 +177,7 @@ cd [project-directory]
 
 ### License
 
-[License name and/or link.]
+MIT. See [LICENSE](LICENSE). Gemma 4 model weights are distributed under their own license.
 
 ## Submission Checklist
 
