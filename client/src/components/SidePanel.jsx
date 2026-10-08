@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import TermChips from './TermChips.jsx';
+import { TagList } from './TagChip.jsx';
 import FaithReport from './FaithReport.jsx';
 import { SABOTAGED } from '../demo.js';
 import { streamStory } from '../api.js';
@@ -106,10 +106,13 @@ export default function SidePanel({ node, links, nodesById, thread, threadError,
   if (!node) return null;
 
   return (
-    <aside className="absolute right-0 top-0 z-10 flex h-full w-96 max-w-full flex-col gap-3 overflow-y-auto border-l border-line bg-surface p-5 shadow-card">
+    <aside
+      aria-label={`Note ${node.id}`}
+      className="animate-slide-in fixed right-0 top-0 z-40 flex h-dvh w-[26rem] max-w-full flex-col gap-3 overflow-y-auto border-l border-line bg-surface p-5 shadow-card"
+    >
       <div className="flex items-start justify-between gap-2">
         <h2 className="font-display text-base font-semibold">Note #{node.id}</h2>
-        <button onClick={onClose} className="text-muted hover:text-ink" aria-label="Close">✕</button>
+        <button type="button" onClick={onClose} className="text-muted hover:text-ink" aria-label="Close note panel">✕</button>
       </div>
       <p className="text-xs text-muted">{formatDate(node.createdAt)}</p>
       {node.summary ? (
@@ -117,7 +120,7 @@ export default function SidePanel({ node, links, nodesById, thread, threadError,
       ) : (
         <p className="text-xs text-warn-ink">Not tagged yet.</p>
       )}
-      <TermChips terms={node.terms} />
+      <TagList terms={node.terms} />
       <p className="whitespace-pre-wrap text-sm leading-relaxed">{node.text}</p>
 
       <Section title={`Links (${links.length})`}>

@@ -3,6 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { forceX, forceY } from 'd3-force';
 import { linkColor, linkLabel } from '../linkTypes.js';
 import { theme, withAlpha } from '../theme.js';
+import { tagColor } from '../tags.js';
 
 const PULSE_MS = 2000;
 const LABEL_ZOOM = 0.9;
@@ -82,6 +83,22 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
     return focusIds;
   }, [hoverId, neighbours, focusIds]);
 
+  // Colour each note by its most widely shared pattern, so a cluster built on
+  // the same mechanism (e.g. "feedback loop") reads as one colour.
+  const nodeColors = useMemo(() => {
+    const freq = new Map();
+    for (const n of data.nodes) {
+      for (const t of n.terms ?? []) if (t.kind === 'pattern') freq.set(t.name, (freq.get(t.name) ?? 0) + 1);
+    }
+    const colors = new Map();
+    for (const n of data.nodes) {
+      const patterns = (n.terms ?? []).filter((t) => t.kind === 'pattern').map((t) => t.name);
+      patterns.sort((a, b) => (freq.get(b) ?? 0) - (freq.get(a) ?? 0) || a.localeCompare(b));
+      if (patterns.length) colors.set(n.id, tagColor(patterns[0]).solid);
+    }
+    return colors;
+  }, [data.nodes]);
+
   const isLit = (id) => !activeFocus || activeFocus.has(id);
   const radius = (node) => 4 + Math.min(neighbours.get(node.id)?.size ?? 0, 6) * 1.2;
 
@@ -114,7 +131,7 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
     }
 
     // A soft paper halo lifts the node off links that pass behind it.
-    const color = node.summary ? theme.accent : theme.muted;
+    const color = nodeColors.get(node.id) ?? theme.muted;
     ctx.shadowColor = withAlpha(theme.ink, 0.18);
     ctx.shadowBlur = lit ? 6 : 0;
     ctx.beginPath();

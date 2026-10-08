@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import StatusPill from './components/StatusPill.jsx';
-import GraphView, { REJECT_FADE_MS } from './components/GraphView.jsx';
-import Legend from './components/Legend.jsx';
-import NoteInput from './components/NoteInput.jsx';
+import { REJECT_FADE_MS } from './components/GraphView.jsx';
+import Nav from './components/Nav.jsx';
+import Hero from './components/Hero.jsx';
+import NotesSection from './components/NotesSection.jsx';
+import GraphSection from './components/GraphSection.jsx';
+import AddSection from './components/AddSection.jsx';
 import SidePanel from './components/SidePanel.jsx';
 import Toast from './components/Toast.jsx';
 import { connectPair, createNote, getGraph, getThread } from './api.js';
@@ -64,6 +66,14 @@ export default function App() {
 
   const focusIds = useMemo(() => (thread ? new Set(thread.map((n) => n.id)) : null), [thread]);
 
+  const linkCounts = useMemo(() => {
+    const counts = new Map();
+    for (const l of graph.links) {
+      for (const id of [idOf(l.source), idOf(l.target)]) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return counts;
+  }, [graph.links]);
+
   const saveNote = async (text) => {
     const { note, terms, links, tagError, linkError } = await createNote(text);
     const node = { ...toNode(note, terms), addedAt: performance.now() };
@@ -73,7 +83,12 @@ export default function App() {
       links: [...g.links, ...links.map((l) => ({ ...l, source: l.src, target: l.dst }))],
     }));
     setNewNodeId(note.id);
-    setToast({ summary: note.summary, terms, links, tagError, linkError });
+    return { noteId: note.id, summary: note.summary, terms, links, tagError, linkError };
+  };
+
+  const showInGraph = (id) => {
+    document.getElementById('graph')?.scrollIntoView({ block: 'start' });
+    setSelectedId(id);
   };
 
   // Drag-to-connect: Gemma judges the dropped pair; a new link joins the graph.
@@ -100,21 +115,17 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-line px-5 py-3">
-        <h1 className="font-display text-xl font-semibold tracking-tight">
-          <span className="text-accent">●</span> Connectore
-        </h1>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted">
-            {graph.nodes.length} notes · {graph.links.length} links
-          </span>
-          <StatusPill />
-        </div>
-      </header>
-
-      <main className="relative flex-1 overflow-hidden">
-        <GraphView
+    <>
+      <Nav noteCount={graph.nodes.length} linkCount={graph.links.length} />
+      <main>
+        {loadError && (
+          <p className="mx-auto max-w-6xl px-4 pt-4 text-sm text-bad-ink sm:px-6" role="alert">
+            Couldn't load notes: {loadError}
+          </p>
+        )}
+        <Hero />
+        <NotesSection notes={graph.nodes} linkCounts={linkCounts} onOpen={setSelectedId} />
+        <GraphSection
           data={graph}
           selectedId={selectedId}
           focusIds={focusIds}
@@ -123,23 +134,22 @@ export default function App() {
           onSelect={setSelectedId}
           onConnect={connect}
         />
-        <Legend />
-        <SidePanel
-          node={selected}
-          links={selectedLinks}
-          nodesById={nodesById}
-          thread={thread}
-          threadError={threadError}
-          onSelect={setSelectedId}
-          onClose={() => setSelectedId(null)}
-        />
-        <Toast toast={toast} nodesById={nodesById} onClose={closeToast} />
-        {loadError && (
-          <p className="absolute left-5 top-4 text-xs text-bad-ink">Couldn't load notes: {loadError}</p>
-        )}
+        <AddSection onSave={saveNote} nodesById={nodesById} onShowInGraph={showInGraph} />
       </main>
+      <footer className="border-t border-line py-8 text-center text-xs text-muted">
+        Connectore · Team WInDaChat · runs locally on Gemma 4 via Ollama
+      </footer>
 
-      <NoteInput onSave={saveNote} />
-    </div>
+      <SidePanel
+        node={selected}
+        links={selectedLinks}
+        nodesById={nodesById}
+        thread={thread}
+        threadError={threadError}
+        onSelect={setSelectedId}
+        onClose={() => setSelectedId(null)}
+      />
+      <Toast toast={toast} nodesById={nodesById} onClose={closeToast} />
+    </>
   );
 }
