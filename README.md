@@ -163,7 +163,7 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 
 ## Demo Video
 
-**Demo Video:** [Video URL]
+**Demo Video:** in this google drive folder https://drive.google.com/drive/folders/1277CJ1Zk7lB6W79Xbb0EczfThwW4_cCk?usp=sharing
 
 ## Open Source and AI Usage
 
