@@ -10,10 +10,10 @@ Everything runs on a laptop through Ollama. No cloud API, and your notes never l
 
 | Member | Contribution |
 | ------ | ------------ |
-| V Aravindhan | [Contribution] |
-| Siva Krithick | [Contribution] |
-| Sahesh Karthikeyan | [Contribution] |
-| Sathyanarayanan | [Contribution] |
+| Sahesh Karthikeyan | Database and infrastructure |
+| Siva Krithick | Inference engine and quantization |
+| V Aravindhan | Programmatic verification |
+| Sathyanarayanan | Core logic, API, and synthesis |
 
 ## Problem Statement
 
@@ -139,9 +139,10 @@ The KV Lab measures the current connected-note workload on the local machine; re
 
 ### Team Contributions
 
-- **[Member Name]:** [Contribution]
-- **[Member Name]:** [Contribution]
-- **[Member Name]:** [Contribution]
+- **Sahesh Karthikeyan:** Database and infrastructure.
+- **Siva Krithick:** Inference engine and quantization.
+- **V Aravindhan:** Programmatic verification.
+- **Sathyanarayanan:** Core logic, API, and narrative synthesis.
 
 ## Working Application
 
