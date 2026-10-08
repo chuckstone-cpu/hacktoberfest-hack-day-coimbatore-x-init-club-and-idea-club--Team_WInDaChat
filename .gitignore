@@ -5,6 +5,5 @@ dist/
 *.db-journal
 *.db-wal
 *.db-shm
-server/lab/results/*.tmp
 npm-debug.log*
 .DS_Store

@@ -1,6 +1,6 @@
 # Connectore
 
-> A local-first second brain. Gemma 4 connects your scattered notes across subjects, narrates them as a story, checks its own story against your notes for dropped facts, and includes a lab that measures how far Gemma's KV cache can be compressed before it starts forgetting things.
+> A local-first second brain. Gemma 4 connects your scattered notes across subjects, narrates them as a story, and checks its own story against your notes for dropped facts.
 
 ## Team
 
@@ -23,22 +23,20 @@ Students and curious readers take notes in silos: Control Systems notes in one p
 
 AI summaries have a trust problem of their own. Published studies report that LLM summaries tend to drop caveats and overgeneralise (Peters & Chin-Yee, Royal Society Open Science, 2025). An EBU/BBC study of AI assistants answering news questions found significant issues in 45% of answers (AIB summary, 2025). A fluent summary is not necessarily a faithful one.
 
-Running models locally has a memory problem. Long prompts, such as "tell me the story of my last 30 notes", make the KV cache grow until it competes with the model weights for RAM and VRAM. KV-cache quantization (q8 / q4) saves memory, but community benchmarks report that Gemma 4 is unusually sensitive to it (LocalBench). "Just use q4" may quietly cost accuracy.
 
 ### Why We Chose This Problem
 
-We are students. We wanted a tool we would use ourselves, one that turns a semester of disconnected notes into connected understanding. We also wanted it to be honest about its own output and able to run on the hardware students actually own. One open-weight model, Gemma 4, does all three jobs: it reasons about connections, audits its own summaries, and is the subject of our compression experiment.
+We are students. We wanted a tool we would use ourselves, one that turns a semester of disconnected notes into connected understanding. We also wanted it to be honest about its own output and able to run on the hardware students actually own. One open-weight model, Gemma 4, does both jobs: it reasons about connections and audits its own summaries.
 
 ## Solution
 
-connectore has three parts, all built on one local Gemma 4 model.
+connectore has two parts, both built on one local Gemma 4 model.
 
 Connect. You write a note. Gemma 4 tags it with entities and abstract patterns (e.g. feedback loop, trade-off, bottleneck), shortlists related older notes, and judges each candidate. The result is a typed link (causes, consequence_of, continuation, contradicts, same_idea), a strength from 1 to 5, and a one-line reason citing a shared fact. Only strong links (≥ 4) are kept. Linked notes form threads, and Gemma can narrate any thread as a short story.
 Verify. Before you trust a story or a summary, a verification layer inspired by TrueSimple checks it against the source notes:
 Deterministic cue diff: numbers, units, dates, negations (not, never), conditions (unless, only if) and bounds (at least, up to) are compared between source and output.
 Fact quiz: Gemma extracts must-keep facts from the sources, then answers a question about each fact using only the generated text. A "not stated" answer means the fact may have been dropped.
 Each fact is marked Appears preserved, Needs review or Possible mismatch, with the source span shown next to it.
-Compress (KV Lab). The same story-plus-verify workload runs with Gemma's KV cache at f16, q8_0 and q4_0. The lab records memory, speed and how many facts survive. The question it answers is how much memory can be saved before the model starts forgetting facts.
 
 ### Key Features
 
@@ -46,16 +44,14 @@ Compress (KV Lab). The same story-plus-verify workload runs with Gemma's KV cach
 - Cross-subject links with a typed relation and a human-readable reason.
 - A thread view and an on-demand story mode.
 - A faithfulness report on every story, with per-fact evidence and no blanket "verified" badge.
-- KV Cache Lab: memory, tokens/s and fact retention across KV-cache precisions, measured on real hardware.
-- Fully local through Ollama, with structured JSON outputs validated by Pydantic.
+- Fully local through Ollama, with structured JSON outputs validated by Zod.
 
 ## Innovation and Differentiation
 
 Reasoned links instead of similarity scores. Tools like Obsidian Smart Connections, Mem and Reflect surface "related notes" by embedding similarity. newNectore explains why two notes relate and how (cause, contradiction, same mechanism). It can find cross-domain links that share no vocabulary, because the tagging step extracts abstract patterns, not just keywords.
 
 An AI that audits itself. Most note apps hand you an AI summary and ask for trust. newNectore shows which facts from your notes survived in the summary and flags the ones that may not have.
-One metric that ties it together. We reuse the fact-preservation check as the quality metric for KV-cache compression. Instead of reporting only abstract numbers like KL divergence, the lab asks a user-level question: did compressing the cache make Gemma drop a fact from your notes?
-Built for student hardware. Gemma 4 E4B runs on a laptop. The KV Lab shows the memory/quality trade-off on the actual machine running the app.
+Built for student hardware. Gemma 4 E4B runs on a laptop.
 
 ## Technical Implementation
 
