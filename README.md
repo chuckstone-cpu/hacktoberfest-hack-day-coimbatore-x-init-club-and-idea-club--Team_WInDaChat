@@ -10,10 +10,10 @@ Everything runs on a laptop through Ollama. There is no cloud API, and your note
 
 | Member | Contribution |
 | ------ | ------------ |
-| V Aravindhan | [Contribution] |
-| Siva Krithick | [Contribution] |
-| Sahesh Karthikeyan | [Contribution] |
-| Sathyanarayanan | [Contribution] |
+| V Aravindhan | Project lead; built the Node + React app, the Gemma pipeline, the verifier and the UI |
+| Siva Krithick | Initial project scaffold, first README documentation, early knowledge-graph prototype |
+| Sahesh Karthikeyan | Repository cleanup on `main` to make way for the final app |
+| Sathyanarayanan | Python fact-verification prototype, frontend UI exploration |
 
 ## Problem Statement
 
@@ -152,10 +152,10 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 
 ### Team Contributions
 
-- **V Aravindhan:** [Contribution]
-- **Siva Krithick:** [Contribution]
-- **Sahesh Karthikeyan:** [Contribution]
-- **Sathyanarayanan:** [Contribution]
+- **V Aravindhan:** Led the project and built the working app step by step: the Node + Express API and React client; notes stored in SQLite and shown as a live force graph; Gemma 4 tagging, shortlisting and batched linking with Zod-validated JSON; threads and the streamed story; the faithfulness verifier (cue check + fact quiz) with its demo mode; drag-to-connect; the fresh-clone install fix (switching to `node:sqlite`); the Paper & Ink UI revamp (scrollable home, coloured tags, React Bits carousel); the README and hack log; and merging everything into `main`.
+- **Siva Krithick:** Scaffolded the initial project structure and configuration, wrote the first README project documentation, and built an early local knowledge-graph workspace prototype.
+- **Sahesh Karthikeyan:** Cleaned up `main` by removing the obsolete Python prototype, data folders and old config, so the final Node app could be merged cleanly.
+- **Sathyanarayanan:** Built the Python fact-verification prototype (spaCy fact extraction plus rule checks for numbers, negations and conditions), whose condition-word list was ported into the app's verifier, and explored an alternative frontend UI.
 
 ## Working Application
 
@@ -279,7 +279,7 @@ MIT. See [LICENSE](LICENSE). Gemma 4 model weights are distributed under their o
 - [x] Architecture included
 - [x] Technical implementation documented
 - [x] Work completed during the hackathon documented
-- [ ] Team contributions documented
+- [x] Team contributions documented
 - [x] Working application is functional
 - [ ] Live application link added where applicable (runs locally; no hosted version)
 - [ ] Demo video added
