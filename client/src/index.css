@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-darker: #0a0a0a;
+  --color-dark: #121212;
+  --color-accent: #FFC000;
+  
+  --animate-slideDown: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-glowPulse: glowPulse 2s infinite ease-in-out alternate;
+  --animate-marquee: marquee 3s linear infinite;
+  --animate-spinSlow: spin 12s linear infinite;
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 10px rgba(204, 255, 0, 0.4)) drop-shadow(0 0 20px rgba(204, 255, 0, 0.2)); transform: scale(1) rotate(45deg); }
+    100% { filter: drop-shadow(0 0 30px rgba(204, 255, 0, 1)) drop-shadow(0 0 60px rgba(204, 255, 0, 0.6)); transform: scale(1.05) rotate(45deg); }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+body {
+  @apply bg-darker text-gray-200 font-sans;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Glitch hover utility */
+.hover-glitch:hover {
+  animation: glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}

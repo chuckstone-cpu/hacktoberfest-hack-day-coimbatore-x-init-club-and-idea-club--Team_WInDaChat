@@ -1,0 +1,12 @@
+[
+  "Negative feedback compares a system's output with the desired setpoint and feeds the error back to reduce it. This keeps systems like a thermostat stable, but too much gain can cause oscillation.",
+  "Blood sugar is regulated by negative feedback: when glucose rises, the pancreas releases insulin, which lowers it; when glucose falls, glucagon raises it.",
+  "TCP congestion control uses additive increase, multiplicative decrease: the sender slowly grows its window while packets get through and halves it when a packet is lost, so the network doesn't collapse.",
+  "A deadlock needs four conditions at once: mutual exclusion, hold and wait, no preemption, and circular wait. Breaking any one of them prevents deadlock.",
+  "The RBI raised the repo rate to curb inflation. Higher borrowing costs are meant to cool demand, and the central bank says it will adjust again if inflation does not come down.",
+  "Two-phase locking makes transactions serializable, but transactions waiting on each other's locks can deadlock, so databases detect cycles in a wait-for graph and abort one transaction.",
+  "When demand for a product rises, its price goes up, which attracts more supply and pushes the price back toward equilibrium.",
+  "In gradient descent, if the learning rate is too high the loss oscillates or diverges instead of settling at the minimum; a smaller step size lets it converge.",
+  "Books can be renewed at most twice, unless someone else has reserved the book. Late returns are fined ₹2 per day after the 14-day loan period.",
+  "Photosynthesis converts light energy, water and carbon dioxide into glucose and oxygen in the chloroplasts."
+]
