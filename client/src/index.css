@@ -1,20 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #0e0e10;
-  --color-panel: #17171b;
-  --color-edge: #2a2a31;
-  --color-ink: #dcddde;
-  --color-muted: #8b8b93;
-  --color-accent: #8b5cf6;
+  --color-canvas: #09090b;
+  --color-panel: rgba(255, 255, 255, 0.03);
+  --color-edge: rgba(255, 255, 255, 0.1);
+  --color-ink: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-accent: #a855f7;
+  --color-accent-glow: rgba(168, 85, 247, 0.5);
 }
 
 html, body, #root {
   height: 100%;
+  margin: 0;
 }
 
 body {
   background: var(--color-canvas);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
   color: var(--color-ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(15, 15, 20, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.glass-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+.glass-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px var(--color-accent-glow);
+  background: rgba(0, 0, 0, 0.5);
 }

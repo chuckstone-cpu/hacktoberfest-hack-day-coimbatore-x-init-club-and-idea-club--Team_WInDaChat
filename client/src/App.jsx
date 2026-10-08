@@ -5,6 +5,8 @@ import Legend from './components/Legend.jsx';
 import NoteInput from './components/NoteInput.jsx';
 import SidePanel from './components/SidePanel.jsx';
 import Toast from './components/Toast.jsx';
+import Dashboard from './components/Dashboard.jsx';
+import BubbleMenu from './components/BubbleMenu.jsx';
 import { createNote, getGraph, getThread } from './api.js';
 
 const idOf = (end) => (typeof end === 'object' ? end.id : end);
@@ -21,7 +23,23 @@ function toNode(note, terms) {
 }
 
 export default function App() {
+  const [view, setView] = useState('graph'); // 'graph' | 'dashboard'
   const [graph, setGraph] = useState({ nodes: [], links: [] });
+
+  const menuItems = [
+    {
+      label: 'graph view',
+      onClick: () => setView('graph'),
+      rotation: -6,
+      hoverStyles: { bgColor: '#8b5cf6', textColor: '#ffffff' }
+    },
+    {
+      label: 'dashboard',
+      onClick: () => setView('dashboard'),
+      rotation: 6,
+      hoverStyles: { bgColor: '#ec4899', textColor: '#ffffff' }
+    }
+  ];
   const [loadError, setLoadError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [thread, setThread] = useState(null);
@@ -76,12 +94,20 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-edge px-5 py-3">
-        <h1 className="text-lg font-semibold tracking-tight">
-          <span className="text-accent">●</span> Connectore
+    <div className="flex h-full flex-col relative">
+      <header className="flex items-center justify-between glass px-6 py-4 z-20">
+        <h1 className="text-xl font-bold tracking-tighter bg-gradient-to-r from-accent to-pink-500 bg-clip-text text-transparent drop-shadow-md">
+          ● Connectore<span className="font-light text-muted text-sm ml-2">Intelligence</span>
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
+          <BubbleMenu
+            logo={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            }
+            items={menuItems}
+            menuBg="rgba(255,255,255,0.05)"
+            menuContentColor="#ffffff"
+          />
           <span className="text-xs text-muted">
             {graph.nodes.length} notes · {graph.links.length} links
           </span>
@@ -91,30 +117,36 @@ export default function App() {
 
       <main className="relative flex-1 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,#8b5cf61a,transparent_60%)]" />
-        <GraphView
-          data={graph}
-          selectedId={selectedId}
-          focusIds={focusIds}
-          newNodeId={newNodeId}
-          onSelect={setSelectedId}
-        />
-        <Legend />
-        <SidePanel
-          node={selected}
-          links={selectedLinks}
-          nodesById={nodesById}
-          thread={thread}
-          threadError={threadError}
-          onSelect={setSelectedId}
-          onClose={() => setSelectedId(null)}
-        />
+        {view === 'graph' ? (
+          <>
+            <GraphView
+              data={graph}
+              selectedId={selectedId}
+              focusIds={focusIds}
+              newNodeId={newNodeId}
+              onSelect={setSelectedId}
+            />
+            <Legend />
+            <SidePanel
+              node={selected}
+              links={selectedLinks}
+              nodesById={nodesById}
+              thread={thread}
+              threadError={threadError}
+              onSelect={setSelectedId}
+              onClose={() => setSelectedId(null)}
+            />
+          </>
+        ) : (
+          <Dashboard nodes={graph.nodes} links={graph.links} />
+        )}
         <Toast toast={toast} nodesById={nodesById} onClose={closeToast} />
         {loadError && (
           <p className="absolute left-5 top-4 text-xs text-red-400">Couldn't load notes: {loadError}</p>
         )}
       </main>
 
-      <NoteInput onSave={saveNote} />
+      {view === 'graph' && <NoteInput onSave={saveNote} />}
     </div>
   );
 }
