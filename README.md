@@ -185,6 +185,7 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 - **[Zod](https://github.com/colinhacks/zod)** (MIT): schemas for model outputs and request validation.
 - **[React](https://github.com/facebook/react)** (MIT) + **[Vite](https://github.com/vitejs/vite)** (MIT) + **[Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)** (MIT): frontend.
 - **[react-force-graph](https://github.com/vasturiano/react-force-graph)** (MIT) and **[d3-force](https://github.com/d3/d3-force)** (ISC): the force-directed knowledge graph.
+- **[React Bits](https://reactbits.dev) Carousel** by David Haz (MIT + Commons Clause): the carousel of recent notes in the hero. Installed with the shadcn CLI into `client/src/components/reactbits/Carousel/` and restyled for our theme; it is not our work. **[Motion](https://github.com/motiondivision/motion)** (MIT) powers its animation.
 - **[concurrently](https://github.com/open-cli-tools/concurrently)** (MIT): runs the API and UI together in development.
 
 ### Ideas and research we build on

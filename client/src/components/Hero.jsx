@@ -1,7 +1,7 @@
-export default function Hero() {
+export default function Hero({ carousel }) {
   return (
     <section id="home" className="relative flex min-h-[calc(100svh-4rem)] items-center">
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_1fr]">
+      <div className={`mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 ${carousel ? 'lg:grid-cols-[1.1fr_1fr]' : ''}`}>
         <div className="flex flex-col gap-6">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-accent-ink">A local-first second brain</p>
           <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-7xl">
@@ -27,8 +27,11 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Placeholder: the carousel of recent notes goes here (UI prompt 3). */}
-        <div id="hero-carousel" className="min-h-[18rem]" />
+        {carousel && (
+          <div id="hero-carousel" className="min-w-0">
+            {carousel}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { REJECT_FADE_MS } from './components/GraphView.jsx';
 import Nav from './components/Nav.jsx';
 import Hero from './components/Hero.jsx';
+import HeroCarousel from './components/HeroCarousel.jsx';
 import NotesSection from './components/NotesSection.jsx';
 import GraphSection from './components/GraphSection.jsx';
 import AddSection from './components/AddSection.jsx';
@@ -123,7 +124,7 @@ export default function App() {
             Couldn't load notes: {loadError}
           </p>
         )}
-        <Hero />
+        <Hero carousel={graph.nodes.length > 0 && <HeroCarousel notes={graph.nodes} onOpen={setSelectedId} />} />
         <NotesSection notes={graph.nodes} linkCounts={linkCounts} onOpen={setSelectedId} />
         <GraphSection
           data={graph}

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "d3-force": "^3.0.0",
+    "motion": "^12.43.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-force-graph-2d": "^1.29.2"
