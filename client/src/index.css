@@ -1,12 +1,47 @@
 @import "tailwindcss";
 
-@theme {
-  --color-canvas: #0e0e10;
-  --color-panel: #17171b;
-  --color-edge: #2a2a31;
-  --color-ink: #dcddde;
-  --color-muted: #8b8b93;
-  --color-accent: #8b5cf6;
+/* "Paper & Ink" design tokens. Components use them through Tailwind
+   (bg-bg, bg-surface, text-ink, text-muted, border-line, text-accent…);
+   the graph canvas reads the same variables in theme.js. */
+:root {
+  --bg: #F6F1E7;
+  --surface: #FFFDF8;
+  --ink: #1C2B2D;
+  --muted: #5B6B6E;
+  --line: #E4DCCB;
+  --accent: #0E7C72;
+  --accent-ink: #0A5E57; /* teal dark enough for text on a teal tint */
+  --accent-2: #E2674A;
+
+  /* Faithfulness statuses: the base hue for tints, a darker ink for text. */
+  --good: #2E7D4F;
+  --good-ink: #1F6B42;
+  --warn: #C98A1B;
+  --warn-ink: #7A5208;
+  --bad: #B83A4B;
+  --bad-ink: #9C2E3D;
+
+  --shadow-card: 0 1px 2px rgb(28 43 45 / 0.06), 0 8px 24px rgb(28 43 45 / 0.06);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+  --color-good: var(--good);
+  --color-good-ink: var(--good-ink);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-bad: var(--bad);
+  --color-bad-ink: var(--bad-ink);
+  --shadow-card: var(--shadow-card);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 html, body, #root {
@@ -14,7 +49,20 @@ html, body, #root {
 }
 
 body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The graph library's hover tooltip ships a dark style; match the paper theme. */
+.float-tooltip-kap {
+  max-width: 280px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 12px/1.45 var(--font-sans);
+  box-shadow: var(--shadow-card);
 }

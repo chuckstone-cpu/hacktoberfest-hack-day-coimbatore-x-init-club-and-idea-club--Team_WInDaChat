@@ -2,9 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { forceX, forceY } from 'd3-force';
 import { linkColor, linkLabel } from '../linkTypes.js';
+import { theme, withAlpha } from '../theme.js';
 
-const NODE_COLOR = '#a78bfa';
-const UNTAGGED_COLOR = '#71717a';
 const PULSE_MS = 2000;
 const LABEL_ZOOM = 0.9;
 const DIM_ALPHA = 0.15;
@@ -21,9 +20,8 @@ function escapeHtml(s) {
 }
 
 function linkTooltip(l) {
-  return `<div style="max-width:260px;font:12px Inter,system-ui,sans-serif;line-height:1.4">
-    <b style="color:${linkColor(l.type)}">${escapeHtml(linkLabel(l.type))}</b>
-    <span style="opacity:.6"> · strength ${l.strength}/5</span><br/>${escapeHtml(l.reason)}</div>`;
+  return `<b style="color:${linkColor(l.type)}">${escapeHtml(linkLabel(l.type))}</b>
+    <span style="color:${theme.muted}"> · strength ${l.strength}/5</span><br/>${escapeHtml(l.reason)}`;
 }
 
 // focusIds: notes to keep bright (the open thread); everything else dims.
@@ -100,7 +98,7 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
       if (t < 1) {
         ctx.beginPath();
         ctx.arc(node.x, node.y, r + 14 * t, 0, 2 * Math.PI);
-        ctx.strokeStyle = `rgba(167, 139, 250, ${1 - t})`;
+        ctx.strokeStyle = withAlpha(theme.accent2, 1 - t);
         ctx.lineWidth = 2 / scale;
         ctx.stroke();
       }
@@ -110,27 +108,46 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
     if (node.id === dropTargetId) {
       ctx.beginPath();
       ctx.arc(node.x, node.y, r + 6 / scale, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#ddd6fe';
+      ctx.strokeStyle = theme.ink;
       ctx.lineWidth = 2 / scale;
       ctx.stroke();
     }
 
-    const color = node.summary ? NODE_COLOR : UNTAGGED_COLOR;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = active ? 24 : lit ? 12 : 0;
+    // A soft paper halo lifts the node off links that pass behind it.
+    const color = node.summary ? theme.accent : theme.muted;
+    ctx.shadowColor = withAlpha(theme.ink, 0.18);
+    ctx.shadowBlur = lit ? 6 : 0;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
-    ctx.fillStyle = active ? '#ddd6fe' : color;
+    ctx.arc(node.x, node.y, r + 2.5 / scale, 0, 2 * Math.PI);
+    ctx.fillStyle = theme.surface;
     ctx.fill();
     ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    if (active) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, r + 2.5 / scale, 0, 2 * Math.PI);
+      ctx.strokeStyle = theme.ink;
+      ctx.lineWidth = 1.5 / scale;
+      ctx.stroke();
+    }
 
     if (active || (lit && (scale >= LABEL_ZOOM || activeFocus))) {
       const fontSize = 12 / scale;
       ctx.font = `${fontSize}px Inter, system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = active ? '#f4f4f5' : 'rgba(220, 221, 222, 0.8)';
-      ctx.fillText(shortLabel(node.label), node.x, node.y + r + 3 / scale);
+      // Paper outline keeps labels readable where they cross links.
+      const label = shortLabel(node.label);
+      const ty = node.y + r + 4 / scale;
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3 / scale;
+      ctx.strokeStyle = theme.bg;
+      ctx.strokeText(label, node.x, ty);
+      ctx.fillStyle = active ? theme.ink : withAlpha(theme.ink, 0.85);
+      ctx.fillText(label, node.x, ty);
     }
     ctx.restore();
   };
@@ -193,7 +210,7 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
     ctx.save();
     ctx.setLineDash([4 / scale, 4 / scale]);
     ctx.lineDashOffset = -(performance.now() / 40) / scale; // marching ants while thinking
-    ctx.strokeStyle = pending.status === 'rejected' ? `rgba(248, 113, 113, ${alpha})` : `rgba(221, 214, 254, ${alpha})`;
+    ctx.strokeStyle = withAlpha(pending.status === 'rejected' ? theme.bad : theme.accent, alpha);
     ctx.lineWidth = 1.5 / scale;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -210,11 +227,11 @@ export default function GraphView({ data, selectedId, focusIds, newNodeId, pendi
           width={size.width}
           height={size.height}
           graphData={data}
-          backgroundColor="rgba(0,0,0,0)"
+          backgroundColor="transparent"
           nodeCanvasObject={drawNode}
           nodePointerAreaPaint={paintHitArea}
           nodeLabel={(n) => escapeHtml(n.text)}
-          linkColor={(l) => (linkLit(l) ? linkColor(l.type) : 'rgba(82, 82, 91, 0.15)')}
+          linkColor={(l) => (linkLit(l) ? linkColor(l.type) : withAlpha(theme.line, 0.6))}
           linkWidth={(l) => (l.strength ?? 3) / 2}
           linkLabel={linkTooltip}
           linkHoverPrecision={6}

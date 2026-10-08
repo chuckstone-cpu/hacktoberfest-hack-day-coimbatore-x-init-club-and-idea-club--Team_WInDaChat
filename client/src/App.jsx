@@ -101,8 +101,8 @@ export default function App() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-edge px-5 py-3">
-        <h1 className="text-lg font-semibold tracking-tight">
+      <header className="flex items-center justify-between border-b border-line px-5 py-3">
+        <h1 className="font-display text-xl font-semibold tracking-tight">
           <span className="text-accent">●</span> Connectore
         </h1>
         <div className="flex items-center gap-3">
@@ -114,7 +114,6 @@ export default function App() {
       </header>
 
       <main className="relative flex-1 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,#8b5cf61a,transparent_60%)]" />
         <GraphView
           data={graph}
           selectedId={selectedId}
@@ -136,7 +135,7 @@ export default function App() {
         />
         <Toast toast={toast} nodesById={nodesById} onClose={closeToast} />
         {loadError && (
-          <p className="absolute left-5 top-4 text-xs text-red-400">Couldn't load notes: {loadError}</p>
+          <p className="absolute left-5 top-4 text-xs text-bad-ink">Couldn't load notes: {loadError}</p>
         )}
       </main>
 

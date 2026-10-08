@@ -22,21 +22,25 @@ export default function StatusPill() {
     return () => { alive = false; clearInterval(id); };
   }, []);
 
-  let dot = 'bg-zinc-500';
+  let dot = 'bg-muted';
+  let tone = 'border-line bg-surface text-muted';
   let label = 'Checking…';
+  const down = 'border-bad/40 bg-bad/10 text-bad-ink';
   if (apiDown) {
-    dot = 'bg-red-500';
+    dot = 'bg-bad';
+    tone = down;
     label = 'API offline';
   } else if (health) {
     const up = health.ollama === 'up';
-    dot = up ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]';
+    dot = up ? 'bg-accent' : 'bg-bad';
+    tone = up ? 'border-accent/30 bg-accent/10 text-accent-ink' : down;
     label = up
       ? `${health.model} · Ollama ${health.ollamaVersion}`
       : `${health.model} · Ollama down`;
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-edge bg-panel px-3 py-1 text-xs text-muted">
+    <div className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${tone}`} role="status">
       <span className={`h-2 w-2 rounded-full ${dot}`} />
       <span>{label}</span>
     </div>

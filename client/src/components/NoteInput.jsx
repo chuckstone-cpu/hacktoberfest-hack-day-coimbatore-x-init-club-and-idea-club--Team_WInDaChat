@@ -27,7 +27,7 @@ export default function NoteInput({ onSave }) {
   };
 
   return (
-    <form onSubmit={submit} className="border-t border-edge bg-panel/90 px-5 py-3 backdrop-blur">
+    <form onSubmit={submit} className="border-t border-line bg-surface px-5 py-3">
       <div className="mx-auto flex max-w-3xl items-center gap-3">
         <input
           value={text}
@@ -36,13 +36,13 @@ export default function NoteInput({ onSave }) {
           placeholder={saving ? 'Gemma is tagging and linking your note…' : 'Write a note and press Enter…'}
           readOnly={saving}
           autoFocus
-          className={`flex-1 rounded-lg border border-edge bg-canvas px-4 py-2.5 text-sm outline-none placeholder:text-muted focus:border-accent ${saving ? 'opacity-60' : ''}`}
+          className={`flex-1 rounded-2xl border border-line bg-bg px-4 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-accent ${saving ? 'opacity-60' : ''}`}
         />
         <span className="w-20 text-right text-xs tabular-nums text-muted">
           {saving ? <span className="animate-pulse text-accent">thinking…</span> : `${text.length}/${MAX_LEN}`}
         </span>
       </div>
-      {error && <p className="mx-auto mt-2 max-w-3xl text-xs text-red-400">{error}</p>}
+      {error && <p className="mx-auto mt-2 max-w-3xl text-xs text-bad-ink">{error}</p>}
     </form>
   );
 }

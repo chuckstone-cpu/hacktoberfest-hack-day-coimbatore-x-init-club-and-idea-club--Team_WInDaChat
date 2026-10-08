@@ -18,10 +18,10 @@ export default function Toast({ toast, nodesById, onClose }) {
 
   return (
     <div className="absolute left-1/2 top-4 z-20 w-[min(32rem,calc(100%-2rem))] -translate-x-1/2">
-      <div className={`flex flex-col gap-2 rounded-xl border bg-panel/95 p-4 shadow-xl backdrop-blur ${warn ? 'border-amber-500/50' : 'border-accent/40'}`}>
+      <div className={`flex flex-col gap-2 rounded-2xl border bg-surface p-4 shadow-card ${warn ? 'border-warn/50' : 'border-accent/40'}`}>
         <div className="flex items-start justify-between gap-3">
           {tagError ? (
-            <p className="text-sm text-amber-300">Note saved, but tagging failed. {tagError}</p>
+            <p className="text-sm text-warn-ink">Note saved, but tagging failed. {tagError}</p>
           ) : (
             <p className="text-sm">{summary}</p>
           )}
@@ -30,9 +30,9 @@ export default function Toast({ toast, nodesById, onClose }) {
         <TermChips terms={terms} />
 
         {!tagError && (
-          <div className="flex flex-col gap-1.5 border-t border-edge pt-2">
+          <div className="flex flex-col gap-1.5 border-t border-line pt-2">
             {linkError ? (
-              <p className="text-xs text-amber-300">{linkError}</p>
+              <p className="text-xs text-warn-ink">{linkError}</p>
             ) : (
               <p className="text-xs font-medium text-muted">
                 {links.length === 0 ? 'No strong connections to older notes.' : `Linked to ${links.length} note${links.length > 1 ? 's' : ''}`}
@@ -60,8 +60,8 @@ function ConnectToast({ c, nodesById, onClose }) {
   let border = 'border-accent/40';
   let body;
   if (c.error) {
-    border = 'border-amber-500/50';
-    body = <p className="text-sm text-amber-300">{c.error}</p>;
+    border = 'border-warn/50';
+    body = <p className="text-sm text-warn-ink">{c.error}</p>;
   } else if (c.linked) {
     body = (
       <>
@@ -74,7 +74,7 @@ function ConnectToast({ c, nodesById, onClose }) {
       </>
     );
   } else {
-    border = 'border-red-500/40';
+    border = 'border-bad/40';
     body = (
       <>
         <p className="text-sm">
@@ -86,7 +86,7 @@ function ConnectToast({ c, nodesById, onClose }) {
   }
   return (
     <div className="absolute left-1/2 top-4 z-20 w-[min(32rem,calc(100%-2rem))] -translate-x-1/2">
-      <div className={`flex flex-col gap-1.5 rounded-xl border bg-panel/95 p-4 shadow-xl backdrop-blur ${border}`}>
+      <div className={`flex flex-col gap-1.5 rounded-2xl border bg-surface p-4 shadow-card ${border}`}>
         <div className="flex items-start justify-between gap-3">
           <p className="text-[11px] text-muted">{name(c.a)} ↔ {name(c.b)}</p>
           <button onClick={onClose} className="text-muted hover:text-ink" aria-label="Dismiss">✕</button>
