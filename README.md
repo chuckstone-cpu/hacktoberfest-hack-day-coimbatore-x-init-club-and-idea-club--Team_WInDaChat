@@ -145,7 +145,7 @@ Everything below was built during the Hack Day; the commit history on the `Aravi
 What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 
 - Tagging takes about 1.2–1.7 s per note once the model is loaded; adding a note (tag + link) takes about 3–6 s.
-- Seeding the 10 demo notes saved 9 links: control systems, blood sugar, TCP, the RBI repo-rate note and supply/demand form one feedback-loop cluster, and the photosynthesis note correctly gets 0 links.
+- Seeding the 10 demo notes saved 8–9 links across our runs (the model's scores vary slightly between runs): control systems, blood sugar, TCP, the RBI repo-rate note and supply/demand form one feedback-loop cluster, and the photosynthesis note correctly gets 0 links.
 - The verifier flags the sabotaged library story with 3 *Possible mismatch* facts and 1 *Needs review*, while a real 6-note story had all 7 facts *Appears preserved*.
 
 ### Team Contributions
