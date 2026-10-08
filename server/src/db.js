@@ -1,9 +1,9 @@
-import Database from 'better-sqlite3';
+// Node's built-in SQLite: no native package to compile on install.
+import { DatabaseSync } from 'node:sqlite';
 import { config } from './config.js';
 
-export const db = new Database(config.dbPath);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+export const db = new DatabaseSync(config.dbPath);
+db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
 
 // Schema from docs/BUILD_GUIDE.md section 5.
 db.exec(`
@@ -99,13 +99,20 @@ export function getNoteTerms(noteId) {
 
 // Saves the summary and terms in one transaction, so a failure never leaves
 // a note half-tagged. A term keeps the kind it was first saved with.
-export const saveTags = db.transaction((noteId, summary, terms) => {
-  stmts.setSummary.run(summary, noteId);
-  for (const { name, kind } of terms) {
-    const { id } = stmts.upsertTerm.get(name, kind);
-    stmts.addNoteTerm.run(noteId, id);
+export function saveTags(noteId, summary, terms) {
+  db.exec('BEGIN');
+  try {
+    stmts.setSummary.run(summary, noteId);
+    for (const { name, kind } of terms) {
+      const { id } = stmts.upsertTerm.get(name, kind);
+      stmts.addNoteTerm.run(noteId, id);
+    }
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
   }
-});
+}
 
 export function shortlist(noteId, limit) {
   return stmts.shortlist.all(noteId, limit);

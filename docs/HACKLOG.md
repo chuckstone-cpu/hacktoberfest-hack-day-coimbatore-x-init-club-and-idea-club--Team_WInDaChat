@@ -50,3 +50,8 @@ What was built, step by step (see `docs/BUILD_GUIDE.md` section 7). Everything h
 - Problem found: when rejecting a pair, Gemma's single `reason` often argued *for* a similarity ("both describe feedback…"). Fix: the pair schema now asks for both `reason` (strongest link) and `difference` (what separates them); rejections show `difference`.
 - Results on our machine (seeded notes, ~1.5 s per judgement): photosynthesis ↔ TCP → no strong connection (2/5, "energy conversion in chloroplasts" vs "network flow control"); gradient descent ↔ blood sugar → linked, same idea 4/5; deadlock ↔ RBI → 1/5.
 - User-suggested pairs sometimes score higher than the same pair did during automatic linking (RBI ↔ TCP: 2/5 automatic, 4/5 when dragged), so manual links are marked `origin='manual'` in the database.
+
+## Step 10: Polish and submission
+- README rewritten from what was actually built and measured; team contributions, demo video and Devpost links are left for the team to fill in.
+- Internal-only helpers made module-private; no debug code left in the client.
+- Fresh-clone test (`git clone` → `npm install` → `npm run seed` → `npm run dev`) caught a real problem: `better-sqlite3` 13 ships prebuilt binaries but also a `binding.gyp`, so npm ran `node-gyp rebuild` on a fresh install and failed without Visual Studio C++ tools. Switched to Node's built-in `node:sqlite` (Node ≥ 22.13), which removes the native dependency; the npm scripts pass `--disable-warning=ExperimentalWarning` to hide its one-time warning.

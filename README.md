@@ -82,8 +82,8 @@ flowchart LR
 | Category        | Technologies |
 | --------------- | ------------ |
 | Frontend        | React 19 + Vite 8, Tailwind CSS 4, `react-force-graph-2d` (knowledge graph), `d3-force` |
-| Backend         | Node.js 20+ (developed on 24), Express 5, `ollama` JS client |
-| Database        | SQLite via `better-sqlite3` |
+| Backend         | Node.js 22.13+ (developed on 24), Express 5, `ollama` JS client |
+| Database        | SQLite via Node's built-in `node:sqlite` |
 | AI / ML         | Gemma 4 (`gemma4:e4b` by default, configurable) served locally by Ollama; Zod for structured-output schemas and validation |
 | Infrastructure  | Local machine only (Ollama server + Node API + Vite dev server) |
 | APIs / Services | N/A, no external services |
@@ -181,7 +181,7 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 - **[Ollama](https://github.com/ollama/ollama)** (MIT): local model serving with JSON-schema structured outputs.
 - **[ollama-js](https://github.com/ollama/ollama-js)** (MIT): Ollama client for Node.
 - **[Express](https://github.com/expressjs/express)** (MIT): API server. **[cors](https://github.com/expressjs/cors)** (MIT) and **[dotenv](https://github.com/motdotla/dotenv)** (BSD-2-Clause): CORS headers and `.env` loading.
-- **[better-sqlite3](https://github.com/WiseLibs/better-sqlite3)** (MIT) / **SQLite** (public domain): storage.
+- **SQLite** (public domain), through Node's built-in `node:sqlite` module: storage.
 - **[Zod](https://github.com/colinhacks/zod)** (MIT): schemas for model outputs and request validation.
 - **[React](https://github.com/facebook/react)** (MIT) + **[Vite](https://github.com/vitejs/vite)** (MIT) + **[Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)** (MIT): frontend.
 - **[react-force-graph](https://github.com/vasturiano/react-force-graph)** (MIT) and **[d3-force](https://github.com/d3/d3-force)** (ISC): the force-directed knowledge graph.
@@ -197,7 +197,7 @@ What we measured on our laptop with the seed notes (from `docs/HACKLOG.md`):
 
 ### Prerequisites
 
-- Node.js 20+ (developed on Node 24)
+- Node.js 22.13 or newer (developed on Node 24); the app uses Node's built-in SQLite, so no C++ build tools are needed
 - [Ollama](https://ollama.com) (tested with version 0.40.1)
 - Gemma 4 pulled locally: `ollama pull gemma4:e4b`
 
@@ -249,6 +249,7 @@ npm run dev          # API on :3001, UI on http://localhost:5173
 - **Honest rejections.** When asked to reject a pair of notes, the model's one-line reason often argued *for* a similarity. Asking for two separate fields (what links them, and what separates them) gave clear explanations.
 - **Faithfulness is subtle.** A story saying "a small fine" instead of "₹2 per day" reads fine but loses the fact. We made a number dropped from a fact count as a possible mismatch, not just a changed number.
 - **Windows dev quirks.** `node --watch` restarted the API whenever Vite rewrote its cache; watching only `server/src` fixed it.
+- **A clean install is the real test.** Our first install of `better-sqlite3` worked, but a fresh clone tried to compile it from source and failed without Visual Studio's C++ tools. We switched to Node's built-in `node:sqlite`, which needs nothing extra to install.
 
 ## Devpost Submission
 
@@ -258,7 +259,7 @@ npm run dev          # API on :3001, UI on http://localhost:5173
 
 ### Credits
 
-Gemma 4 by Google DeepMind · Ollama · React · Vite · Tailwind CSS · react-force-graph · d3-force · Express · Zod · SQLite / better-sqlite3. Research credits are listed under [Ideas and research we build on](#ideas-and-research-we-build-on).
+Gemma 4 by Google DeepMind · Ollama · React · Vite · Tailwind CSS · react-force-graph · d3-force · Express · Zod · SQLite. Research credits are listed under [Ideas and research we build on](#ideas-and-research-we-build-on).
 
 ### License
 
