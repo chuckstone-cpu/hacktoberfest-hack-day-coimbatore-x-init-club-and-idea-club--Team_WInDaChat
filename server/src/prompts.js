@@ -2,7 +2,7 @@
 
 // Reusing a shared vocabulary keeps patterns consistent across notes
 // ("feedback loop", not "feedback" one time and "feedback cycle" the next).
-export const PREFERRED_PATTERNS = [
+const PREFERRED_PATTERNS = [
   'feedback loop',
   'trade-off',
   'bottleneck',

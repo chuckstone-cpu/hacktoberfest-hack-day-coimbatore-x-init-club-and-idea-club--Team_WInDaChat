@@ -11,7 +11,7 @@ const NOT_STATED = /\bnot (stated|mentioned|specified|given)\b/i;
 
 // Facts whose quote isn't really in the notes are dropped: we never show the
 // user a "source" the model made up.
-export async function extractFacts(sources) {
+async function extractFacts(sources) {
   const { facts } = await callJson(FactList, factMessages(sources), { label: 'facts' });
   const kept = facts.filter((f) => contains(sources, f.source_span));
   if (kept.length < facts.length) {
@@ -20,7 +20,7 @@ export async function extractFacts(sources) {
   return kept;
 }
 
-export async function answerFacts(facts, text) {
+async function answerFacts(facts, text) {
   if (facts.length === 0) return [];
   const { answers } = await callJson(AnswerList, answerMessages(text, facts.map((f) => f.question)), { label: 'answers' });
   return facts.map((_, i) => {
@@ -32,7 +32,7 @@ export async function answerFacts(facts, text) {
 
 // Combines the quiz answer with the cue check for each fact. Statuses are
 // evidence for a human, not a verdict: never "verified" or "safe".
-export function judgeFacts(facts, answers, text) {
+function judgeFacts(facts, answers, text) {
   return facts.map((f, i) => {
     const { answer, evidence } = answers[i];
     const notStated = NOT_STATED.test(answer);

@@ -10,7 +10,7 @@ const normalise = (s) => s.trim().replace(/\s+/g, ' ').toLowerCase();
 
 // Asks Gemma for a summary, entities and patterns, then stores them.
 // Throws if Gemma fails; nothing is saved in that case.
-export async function tagNote(note) {
+async function tagNote(note) {
   const tags = await callJson(TagResult, tagMessages(note.text), { label: 'tag' });
 
   const seen = new Set();
@@ -31,7 +31,7 @@ export async function tagNote(note) {
 
 // Keeps only links the model can't have invented: a candidate's id, a strong
 // enough strength, and one entry per candidate (the strongest wins).
-export function filterLinks(proposed, candidateIds) {
+function filterLinks(proposed, candidateIds) {
   const best = new Map();
   for (const l of proposed) {
     if (!candidateIds.has(l.note_id) || l.strength < MIN_STRENGTH) continue;
@@ -43,7 +43,7 @@ export function filterLinks(proposed, candidateIds) {
 
 // One batched Gemma call judges the note against all shortlisted candidates.
 // Returns { links, judged } where judged is everything the model proposed.
-export async function linkNote(note) {
+async function linkNote(note) {
   const candidates = shortlist(note.id, MAX_CANDIDATES);
   if (candidates.length === 0) return { links: [], judged: [], candidates };
 

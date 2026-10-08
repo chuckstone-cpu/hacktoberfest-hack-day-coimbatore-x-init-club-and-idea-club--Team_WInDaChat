@@ -84,7 +84,7 @@ function wordCues(sentence) {
 }
 
 // All cues in a text, each tagged with the sentence it came from.
-export function extractCues(text) {
+function extractCues(text) {
   return splitSentences(text).flatMap((sentence) =>
     [...numberCues(sentence), ...wordCues(sentence)].map((c) => ({ ...c, sentence })),
   );

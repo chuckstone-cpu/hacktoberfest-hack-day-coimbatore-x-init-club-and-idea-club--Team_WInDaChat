@@ -9,7 +9,7 @@ export const TagResult = z.object({
   patterns: z.array(z.string().min(1).max(40)).min(1).max(4),
 });
 
-export const LINK_TYPES = ['causes', 'consequence_of', 'continuation', 'contradicts', 'same_idea'];
+const LINK_TYPES = ['causes', 'consequence_of', 'continuation', 'contradicts', 'same_idea'];
 
 export const LinkResult = z.object({
   links: z
@@ -24,7 +24,7 @@ export const LinkResult = z.object({
     .max(8),
 });
 
-export const FACT_CATEGORIES = ['number', 'date', 'negation', 'condition', 'exception', 'obligation', 'name', 'other'];
+const FACT_CATEGORIES = ['number', 'date', 'negation', 'condition', 'exception', 'obligation', 'name', 'other'];
 
 export const FactList = z.object({
   facts: z
