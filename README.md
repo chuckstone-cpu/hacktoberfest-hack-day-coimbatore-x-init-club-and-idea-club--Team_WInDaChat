@@ -44,9 +44,10 @@ newNectore has three parts, all built on one local Gemma 4 model.
 
 - One input box. No folders, tags or manual linking.
 - Cross-subject links with a typed relation and a human-readable reason.
+- An interactive knowledge map: each note is a node and each saved typed link is a labelled arrow.
 - A thread view and an on-demand story mode.
 - A faithfulness report on every story, with per-fact evidence and no blanket "verified" badge.
-- KV Cache Lab: memory, tokens/s and fact retention across KV-cache precisions, measured on real hardware.
+- KV Cache Lab: memory, story time and fact retention across KV-cache precisions, measured on real hardware.
 - Fully local through Ollama, with structured JSON outputs validated by Pydantic.
 ## Innovation and Differentiation
 
@@ -72,7 +73,7 @@ flowchart LR
     TH --> ST[Story<br/>Gemma 4 narrative]
     ST --> V[Verifier<br/>regex cue diff + fact quiz]
     TH --> V
-    V --> UI[Streamlit UI<br/>Notes · Threads · Story + Report · KV Lab]
+    V --> UI[Streamlit UI<br/>Notes · Knowledge Map · Threads · Story + Report · KV Lab]
     subgraph KV Lab
       R[run_lab.py<br/>restart Ollama with<br/>f16 / q8_0 / q4_0] --> W[Same story + verify workload<br/>long context]
       W --> M[/api/ps memory · tok/s · facts preserved/]
@@ -101,7 +102,7 @@ flowchart LR
 3. **Linking:** one batched Gemma call judges all candidates and returns a list of `{note_id, type, strength, reason}`.
 4. **Filtering:** a link is saved only if `strength ≥ 4`, the type is valid and `note_id` was in the shortlist, so the model cannot invent links. Zero links is a valid result.
 
-**Threads** are not stored. They are computed by walking saved links and sorting by date. **Story** sends one thread to Gemma 4 and streams the narrative.
+**Threads** are not stored. They are computed by walking saved links and sorting by date. **Story** sends one thread to Gemma 4 and renders the returned narrative.
 
 **Verifier**
 
@@ -112,26 +113,29 @@ flowchart LR
 **KV Cache Lab**
 
 - `lab/run_lab.py` restarts `ollama serve` with `OLLAMA_KV_CACHE_TYPE` set to `f16`, `q8_0` and `q4_0` in turn, with `OLLAMA_FLASH_ATTENTION=1`.
-- For each setting it runs a fixed long-context workload: a large thread plus padding notes, `num_ctx` 32K, temperature 0, fixed seed.
-- It records memory from `/api/ps`, speed from `eval_count / eval_duration`, the facts preserved by the verifier, and agreement with the `f16` output. Results go to `lab/results/results.csv`.
+- For each setting it runs the largest connected thread in the local database with the selected context size.
+- It records memory from `/api/ps`, story generation time, and the number of facts marked *Appears preserved*. Results go to `lab/results/results.csv`.
 - The Streamlit **KV Lab** tab plots those results. All numbers shown come from runs on our machine.
 
 ### Technical Decisions
 
 - **Ollama instead of a Hugging Face fake-quant pipeline.** Ollama applies real KV-cache quantization to the model we already serve, and finishes in hours rather than days. The trade-off is that Ollama sets K and V precision together. Separate K/V testing (K8/V4 vs K4/V8) needs `llama-server` with `--cache-type-k/--cache-type-v`, which is future work.
 - **Two Gemma calls per note, not N+1.** Candidates are judged in one batched call, which keeps adding a note fast on a laptop.
-- **Structured outputs are always validated.** Ollama's JSON-schema `format` is used with `think: false`. Every response is validated with Pydantic and retried once, and a failure is shown to the user rather than written to the database. The Ollama version we tested with is listed under Setup.
+- **Structured outputs are validated before persistence.** Ollama's JSON-schema `format` is used for tagging, linking, and fact checking; Pydantic rejects malformed output before it is stored. A failure is shown to the user rather than written to the database. The Ollama version used should be recorded under Setup before submission.
 - **Strict linking.** A high threshold keeps the graph clean, so users don't wade through weak "both are about tech" links.
 - **Evidence, not certification.** The verifier says "appears preserved", never "verified" or "safe". It can miss errors and raise false alarms, and the UI says so.
 ## Implementation During the Hackathon
 
-_To be updated during the event. Only list what was actually built._
+The current repository implements the following local-first MVP pieces:
 
-- [ ] Note pipeline: tagging, shortlist, batched linking, filtering
-- [ ] Threads and streamed story mode
-- [ ] Verifier: regex cue diff and fact quiz, plus a per-fact report UI
-- [ ] KV Cache Lab: run script, CSV output, dashboard tab
-- [ ] Seed notes for the demo
+- [x] Note pipeline: schema-validated tagging, SQL concept shortlist, batched link judging, and strict link filtering
+- [x] SQLite persistence for notes, concepts, and typed links
+- [x] Connected-thread view and on-demand story generation
+- [x] Faithfulness report with deterministic cue comparison and model-assisted fact questions
+- [x] KV Cache Lab runner and CSV results view
+- [x] Seed notes for a local demo
+
+The KV Lab measures the current connected-note workload on the local machine; results must be generated before making performance or quality claims.
 
 ### Team Contributions
 
@@ -151,11 +155,11 @@ _To be updated during the event. Only list what was actually built._
 
 _Filled in from `lab/results/results.csv` after running the lab. Nothing here is estimated._
 
-| KV cache type | Context (tokens) | Memory (`/api/ps`) | Tokens/s | Facts preserved | Matches f16 output |
-| ------------- | ---------------- | ------------------ | -------- | --------------- | ------------------ |
-| f16  | | | | | |
-| q8_0 | | | | | |
-| q4_0 | | | | | |
+| KV cache type | Context (tokens) | Memory (`/api/ps`) | Story time (s) | Facts preserved |
+| ------------- | ---------------- | ------------------ | -------------- | --------------- |
+| f16  | | | | |
+| q8_0 | | | | |
+| q4_0 | | | | |
 
 **Hypothesis (from prior work, not yet our result):** KIVI and KVQuant found that keys contain outlier channels and are more sensitive to quantization than values, and LocalBench reports that Gemma 4 degrades more than other model families under KV quantization. We expect `q8_0` to keep most facts and `q4_0` to drop some at long context. Sample sizes are small, so we report raw counts and do not claim statistical significance.
 
@@ -209,21 +213,21 @@ cp .env.example .env
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=gemma4:e4b
 NUM_CTX=16384
-DB_PATH=nectore.db
+DB_PATH=data/nectore.db
 ```
 
 ### Running the Project
 
 ```bash
 ollama serve                      # in one terminal
-python scripts/seed.py            # optional: load demo notes
+python -m scripts.seed            # optional: load demo notes
 streamlit run app.py
 ```
 
 Run the KV Cache Lab (this restarts the Ollama server three times):
 
 ```bash
-python lab/run_lab.py --model gemma4:e4b --ctx 32768
+python -m core.lab.run_lab --model gemma4:e4b --ctx 32768
 ```
 
 ### Usage
